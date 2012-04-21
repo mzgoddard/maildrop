@@ -77,6 +77,7 @@ var GliderInput = aqua.type(aqua.Component,
 var GliderReset = aqua.type(aqua.Component, {
   init: function(map) {
     this.inputMap = map.inputMap || map;
+    this.fired = false;
   },
   ongameadd: function(gameObject, game) {
     this._keydown = this.keydown.bind(this);
@@ -84,10 +85,11 @@ var GliderReset = aqua.type(aqua.Component, {
     this.game = game;
   },
   keydown: function(e) {
-    if (this.inputMap[e.keyCode] == 'up') {
+    if (this.inputMap[e.keyCode] == 'up' && !this.fired) {
       window.removeEventListener('keydown', this._keydown);
       this.game.add(glider.makeGlider());
       this.game.destroy(this.gameObject);
+      this.fired = true;
     }
   }
 });
@@ -107,14 +109,16 @@ var GliderMove = aqua.type(aqua.Component,
       this.angle = 0;
 
       this.radius = 25;
-      
+
       this.score = 0;
-      
+
       this.particle = aqua.Particle.create([this.x, this.y, 0], this.radius, 1);
       this.particle.isTrigger = true;
       this.particle.on('collision', this.oncollision.bind(this));
-      
+
       this.playing = false;
+
+      this.timeToLastCollision = 0;
     },
     onadd: function(gameObject) {
       this.input = gameObject.get(GliderInput);
@@ -194,6 +198,8 @@ var GliderMove = aqua.type(aqua.Component,
 
       this.ax += Math.clamp(nx, -10, 1000);
       this.ay += ny;
+
+      this.timeToLastCollision = 0;
     },
     fixedUpdate: function() {
       if (!this.playing && this.input.get('up')) {
@@ -251,6 +257,14 @@ var GliderMove = aqua.type(aqua.Component,
           this.ax += Math.cos(this.angle) * 50;
           this.ay += Math.sin(this.angle) * 200;
         }
+      }
+
+      if ( ( this.timeToLastCollision += delta ) > 1 ) {
+        $('#booster').text('BOOSTERS: ON');
+        this.ax += Math.cos(this.angle) * 100;
+        this.ay += Math.sin(this.angle) * 100;
+      } else {
+        $('#booster').text('BOOSTERS: OFF');
       }
 
       // integrate
@@ -343,9 +357,13 @@ var GliderMove = aqua.type(aqua.Component,
         
         this.gameObject.game.destroy(this.gameObject);
         
-        var resetObject = aqua.GameObject.create();
-        resetObject.add(GliderReset.create(this.gameObject.get(GliderInput)));
-        this.gameObject.game.add(resetObject);
+        if ( !this.resetCreated ) {
+          var resetObject = aqua.GameObject.create();
+          resetObject.add(GliderReset.create(this.gameObject.get(GliderInput)));
+          this.gameObject.game.add(resetObject);
+
+          this.resetCreated = true;
+        }
       }
     }
   }

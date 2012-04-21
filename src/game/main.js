@@ -94,20 +94,23 @@ aqua.game.graphics.addDrawCall(aqua.PriorityItem.create(function(graphics, gl) {
   var width = window.innerWidth,
       height = window.innerHeight,
       ratio = width / height;
-  
+
   graphics.canvas.width = width;
   graphics.canvas.height = height;
   
   gl.viewport(0, 0, width, height);
+
+  var displayWidth = aqua.game.world.box.width * ( width / height );
+
   mat4.ortho(
+    -( displayWidth - aqua.game.world.box.width ) / 2,
+    -( displayWidth - aqua.game.world.box.width ) / 2 + displayWidth,
     0,
-    width * ( height / aqua.game.world.box.height ),
-    0,
-    height,
+    aqua.game.world.box.height,
     0,
     1000,
     graphics.projection );
-  
+
   // graphics setup
   gl.clear(gl.COLOR_BUFFER_BIT);
   graphics.useShader('basic');

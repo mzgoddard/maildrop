@@ -119,6 +119,8 @@ var GliderMove = aqua.type(aqua.Component,
       this.playing = false;
 
       this.timeToLastCollision = 0;
+      this.crashTimer = -1;
+      this.maxCrashTimer = 2;
     },
     onadd: function(gameObject) {
       this.input = gameObject.get(GliderInput);
@@ -151,6 +153,7 @@ var GliderMove = aqua.type(aqua.Component,
       if (!this.playing) return;
       
       if ( otherParticle.isPlanet ) {
+        this.crashTimer = 0;
         this.particle.isTrigger = false;
         var fixedDelta = aqua.game.timing.fixedDelta,
             self = this;
@@ -201,6 +204,17 @@ var GliderMove = aqua.type(aqua.Component,
 
       this.timeToLastCollision = 0;
     },
+    destruct: function() {
+      this.gameObject.game.destroy(this.gameObject);
+        
+      if ( !this.resetCreated ) {
+        var resetObject = aqua.GameObject.create();
+        resetObject.add(GliderReset.create(this.gameObject.get(GliderInput)));
+        this.gameObject.game.add(resetObject);
+
+        this.resetCreated = true;
+      }
+    },
     fixedUpdate: function() {
       if (!this.playing && this.input.get('up')) {
         this.playing = true;
@@ -218,8 +232,14 @@ var GliderMove = aqua.type(aqua.Component,
       }
 
       if ( !this.particle.isTrigger ) {
+        this.crashTimer += aqua.game.timing.fixedDelta;
         this.x = this.particle.position[ 0 ];
         this.y = this.particle.position[ 1 ];
+
+        if ( this.crashTimer > this.maxCrashTimer ) {
+          this.destruct();
+        }
+
         return;
       }
 
@@ -355,15 +375,7 @@ var GliderMove = aqua.type(aqua.Component,
         
         // Playtomic.Log.Heatmap('Death', '0001', this.x - this.world.box.left, this.y);
         
-        this.gameObject.game.destroy(this.gameObject);
-        
-        if ( !this.resetCreated ) {
-          var resetObject = aqua.GameObject.create();
-          resetObject.add(GliderReset.create(this.gameObject.get(GliderInput)));
-          this.gameObject.game.add(resetObject);
-
-          this.resetCreated = true;
-        }
+        this.destruct();
       }
     }
   }
@@ -780,7 +792,7 @@ var GliderRender = aqua.type(aqua.Component,
     draw: function(graphics, gl) {
       if (!this.buffer) {
         this.buffer = gl.createBuffer();
-        this.arrayBuffer = new ArrayBuffer(4 * 4 * 3);
+        this.arrayBuffer = new ArrayBuffer(4 * 4 * 6);
         this.floatView = new Float32Array(this.arrayBuffer);
       }
       
@@ -791,7 +803,7 @@ var GliderRender = aqua.type(aqua.Component,
           radius = this.move.radius,
           shader = graphics.shaders.basic;
       
-      gl.disable(gl.BLEND);
+      // gl.disable(gl.BLEND);
       
       graphics.useShader('basic');
       
@@ -813,20 +825,34 @@ var GliderRender = aqua.type(aqua.Component,
       floatView[4] = x + Math.cos(angle + Math.PI) * radius;
       floatView[5] = y + Math.sin(angle + Math.PI) * radius;
       
-      floatView[8] = floatView[4] + Math.cos(angle - Math.PI / 4 * 3) * radius / 3 * 2 * Math.lerp(0.7, 1, Math.random());
-      floatView[9] = floatView[5] + Math.sin(angle - Math.PI / 4 * 3) * radius / 3 * 2 * Math.lerp(0.7, 1, Math.random());
-      
+      // floatView[8] = floatView[4] + Math.cos(angle - Math.PI / 4 * 3) * radius / 3 * 2 * Math.lerp(0.7, 1, Math.random());
+      // floatView[9] = floatView[5] + Math.sin(angle - Math.PI / 4 * 3) * radius / 3 * 2 * Math.lerp(0.7, 1, Math.random());
+
+      floatView[8] = floatView[4] + Math.cos(angle + Math.PI / 4 * 3) * radius / 3 * 2;
+      floatView[9] = floatView[5] + Math.sin(angle + Math.PI / 4 * 3) * radius / 3 * 2;
+
+      floatView[12] = floatView[0];
+      floatView[13] = floatView[1];
+
+      floatView[16] = floatView[8];
+      floatView[17] = floatView[9];
+
+      floatView[20] = floatView[0] + Math.cos(angle + Math.PI / 4 * 3) * radius / 3 * 4;
+      floatView[21] = floatView[1] + Math.sin(angle + Math.PI / 4 * 3) * radius / 3 * 4;
+
+      // floatView[]
+
       gl.bindBuffer(gl.ARRAY_BUFFER, this.buffer);
       gl.bufferData(gl.ARRAY_BUFFER, floatView, gl.DYNAMIC_DRAW);
       
       gl.uniformMatrix4fv(shader.matrixLocation, false, graphics.projection);
-      gl.uniform4f(shader.colorLocation, 255 / 255, 90 / 255, 48 / 255, 255 / 255);
+      gl.uniform4f(shader.colorLocation, 255 / 255, 90 / 255, 48 / 255, 255 / 255 * ( this.move.crashTimer >= 0 ? ( this.move.maxCrashTimer - this.move.crashTimer ) / this.move.maxCrashTimer : 1 ));
       gl.uniform1i(shader.texture0Location, 0);
       
       gl.vertexAttribPointer(shader.positionLocation, 2, gl.FLOAT, false, 4 * 4, 0);
       gl.vertexAttribPointer(shader.texcoord0Location, 2, gl.FLOAT, false, 4 * 4, 2 * 4);
       
-      gl.drawArrays(gl.TRIANGLES, 0, 3);
+      gl.drawArrays(gl.TRIANGLES, 0, 6);
     }
   }
 );

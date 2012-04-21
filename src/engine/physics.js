@@ -617,15 +617,18 @@ var WorldRenderer = aqua.type(aqua.Renderer,
       offset = 0;
       for ( i = 0; i < count; i++ ) {
         p = particles[i];
-        if (p.isTrigger) continue;
+        if (!p.isTrigger) {
 
-        x = p.x; y = p.y; lx = p.lx; ly = p.ly;
-        d = Math.mag(x-lx,y-ly) * 2 / 15;
+          x = p.x; y = p.y; lx = p.lx; ly = p.ly;
+          d = Math.mag(x-lx,y-ly) * 2 / 15;
 
-        red = Math.clamp(d * 255, 0, 218);
-        green = Math.clamp(d * 255, 0, 43);
-        blue = Math.clamp(d * 255, 0, 58);
-        alpha = Math.clamp(d * 255, 0, 255);
+          red = Math.clamp(d * 255, 0, 218);
+          green = Math.clamp(d * 255, 0, 43);
+          blue = Math.clamp(d * 255, 0, 58);
+          alpha = Math.clamp(d * 255, 0, 255);
+        }else {
+          red = green = blue = alpha = 0;
+        }
 
         // if ( i % 16 > 11 && p.isTrigger ) {
         //   byteView[i] = 0;

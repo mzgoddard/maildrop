@@ -146,6 +146,22 @@ var GliderMove = aqua.type(aqua.Component,
     oncollision: function(otherParticle, collision) {
       if (!this.playing) return;
       
+      {
+        this.particle.isTrigger = false;
+        var fixedDelta = aqua.game.timing.fixedDelta,
+            self = this;
+        aqua.game.task(function() {
+          // self.particle.mass = 1e3;
+          self.particle.friction = 1;
+          // self.particle.lastPosition[ 0 ] = self.particle.position[ 0 ] - self.vx * fixedDelta;
+          // self.particle.lastPosition[ 1 ] = self.particle.position[ 1 ] - self.vy * fixedDelta;
+        }, aqua.Game.Priorities.GARBAGE, false, true);
+        // this.particle.lastPosition[ 0 ] = this.particle.position[ 0 ] - this.vx * fixedDelta;
+        // this.particle.lastPosition[ 1 ] = this.particle.position[ 1 ] - this.vy * fixedDelta;
+        // console.log( this.particle.position, this.particle.lastPosition );
+        return;
+      }
+
       var delta = aqua.game.timing.fixedDelta,
           vx = otherParticle.lastPosition[0] - otherParticle.position[0],
           vy = otherParticle.lastPosition[1] - otherParticle.position[1],
@@ -186,7 +202,13 @@ var GliderMove = aqua.type(aqua.Component,
         this.y = this.world.box.bottom + this.world.box.height / 8 * 6;
         return;
       }
-      
+
+      if ( !this.particle.isTrigger ) {
+        this.x = this.particle.position[ 0 ];
+        this.y = this.particle.position[ 1 ];
+        return;
+      }
+
       var delta = aqua.game.timing.fixedDelta,
           vl = Math.sqrt(this.vx*this.vx+this.vy*this.vy),
           va = Math.atan2(this.vy, this.vx);

@@ -137,7 +137,8 @@ var Particle = aqua.type(aqua.Emitter,
         bvx = b.lx - b.x,
         bvy = b.ly - b.y,
         bvm = Math.mag(bvx, bvy),
-        fric = Math.abs(c.distance) * (avm + bvm > 50 ? 0.1 : a.friction * b.friction);
+        fric = Math.abs(c.distance) * (// avm + bvm > 50 ? 0.1 : 
+          a.friction * b.friction);
         // fric = Math.abs(c.distance) * (avm + bvm > 10 ? 0.99 : a.friction * b.friction);
 
       // if (avm + bvm < 30) {
@@ -453,7 +454,7 @@ var World = aqua.type(aqua.GameObject,
         var tmp = [ 0, 0, 0];
         var gravity =
           6.674e-4 *
-          ( p.mass * this.gravityMass * 1e12 ) /
+          ( p.mass * this.gravityMass ) /
           vec3.length( vec3.subtract( p.position, this.gravityPosition, tmp ) );
         // vec3.add(p.acceleration, this.gravity, p.acceleration);
         vec3.add(

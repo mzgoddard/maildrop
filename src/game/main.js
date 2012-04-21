@@ -10,7 +10,8 @@ load.module('game/main.js',
   load.chain(load.script('engine/init.js'),
     function() {
       return when.all([
-        load.script( 'game/glider.js' )
+        load.script( 'game/glider.js' ),
+        load.script( 'game/planet.js' )
         // load.script('game/ship.js'),
         // load.script('game/enemy.js'),
         // load.script('game/level.js'),
@@ -62,6 +63,15 @@ aqua.game.task(function() {
 aqua.game.world = aqua.World.create(aqua.Box.create(1000, 1000, 0, 0));
 aqua.game.add(aqua.game.world);
 // aqua.game.world.add(aqua.World.PaperRenderer.create());
+aqua.game.world.add(aqua.World.Renderer.create());
+
+var planet = aqua.Particle.create([ 500, 500, 0 ], 50, 1);
+planet.isStatic = true;
+aqua.game.world.addParticle(planet);
+
+var planetRenderer = aqua.GameObject.create();
+planetRenderer.add(glider.ParticleRenderer.create(planet));
+aqua.game.add(planetRenderer);
 
 // aqua.game.player = btb.makeShip();
 // aqua.game.add(aqua.game.player);

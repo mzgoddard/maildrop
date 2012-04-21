@@ -198,7 +198,7 @@ var GliderMove = aqua.type(aqua.Component,
 
       // gravity
       var gravity = this.gameObject.game.world.calcGravity( [ this.x, this.y, 0 ], 10 );
-      console.log( gravity );
+      // console.log( gravity );
       this.ax += gravity[ 0 ];
       this.ay += gravity[ 1 ];
 

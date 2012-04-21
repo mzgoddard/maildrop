@@ -61,12 +61,17 @@ aqua.game.task(function() {
   aqua.game.timing.last = now;
 }, -10);
 
-aqua.game.world = aqua.World.create(aqua.Box.create(1000, 1000, 0, 0));
+aqua.game.world = aqua.World.create(aqua.Box.create(1500, 1500, 0, 0));
+
 aqua.game.add(aqua.game.world);
 // aqua.game.world.add(aqua.World.PaperRenderer.create());
 aqua.game.world.add(aqua.World.Renderer.create());
 
-var planet = aqua.Particle.create([ 500, 500, 0 ], 50, 1);
+var planet = aqua.Particle.create([
+  aqua.game.world.box.width / 2,
+  aqua.game.world.box.height / 2,
+  0 ], 50, 1);
+aqua.game.world.gravityPosition = planet.position;
 planet.isStatic = true;
 planet.isPlanet = true;
 aqua.game.world.addParticle(planet);
@@ -85,23 +90,47 @@ aqua.game.add(aqua.game.player);
 // aqua.game.levelManager = btb.LevelManager.makeLevelManager();
 // aqua.game.add(aqua.game.levelManager);
 
-for ( var idx = 0; idx < 300; idx++ )
+for ( var idx = 0; idx < 500; idx++ )
   aqua.game.world.addParticle(
     aqua.Particle.create([
-        1000 * (idx / 500),
-        Math.random()*1000,
+        aqua.game.world.box.width * (idx / 500),
+        Math.random()*aqua.game.world.box.width,
         0],
       15+Math.random()*3,
       1));
 
 // var jet = aqua.GameObject.create();
 aqua.game.world.add( glider.Jet.create(
-  [ 586, 549, 0 ],
+  [
+    planet.position[0] + Math.cos(Math.PI/6) * planet.radius * 2,
+    planet.position[1] + Math.sin(Math.PI/6) * planet.radius * 2,
+    0 ],
   [
     Math.cos(Math.PI/6) * 6000,
-    Math.cos(Math.PI/6) * 6000,
+    Math.sin(Math.PI/6) * 6000,
     0
   ] ) );
+aqua.game.world.add( glider.Jet.create(
+  [
+    planet.position[0] + Math.cos(Math.PI/6*5) * planet.radius * 2,
+    planet.position[1] + Math.sin(Math.PI/6*5) * planet.radius * 2,
+    0 ],
+  [
+    Math.cos(Math.PI/6*5) * 6000,
+    Math.sin(Math.PI/6*5) * 6000,
+    0
+  ] ) );
+aqua.game.world.add( glider.Jet.create(
+  [
+    planet.position[0] + Math.cos(Math.PI/6*9) * planet.radius * 2,
+    planet.position[1] + Math.sin(Math.PI/6*9) * planet.radius * 2,
+    0 ],
+  [
+    Math.cos(Math.PI/6*9) * 6000,
+    Math.sin(Math.PI/6*9) * 6000,
+    0
+  ] ) );
+
 
 aqua.game.graphics.addDrawCall(aqua.PriorityItem.create(function(graphics, gl) {
   // graphics setup (once)

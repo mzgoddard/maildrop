@@ -92,15 +92,21 @@ aqua.game.graphics.addDrawCall(aqua.PriorityItem.create(function(graphics, gl) {
 
 aqua.game.graphics.addDrawCall(aqua.PriorityItem.create(function(graphics, gl) {
   var width = window.innerWidth,
-      height = window.innerHeight;
+      height = window.innerHeight,
+      ratio = width / height;
   
   graphics.canvas.width = width;
   graphics.canvas.height = height;
   
   gl.viewport(0, 0, width, height);
   mat4.ortho(
-    aqua.game.world.box.left, aqua.game.world.box.width + aqua.game.world.box.left, 0, aqua.game.world.box.height, 0, 1000,
-    graphics.projection);
+    0,
+    width * ( height / aqua.game.world.box.height ),
+    0,
+    height,
+    0,
+    1000,
+    graphics.projection );
   
   // graphics setup
   gl.clear(gl.COLOR_BUFFER_BIT);

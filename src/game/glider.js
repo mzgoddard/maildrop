@@ -95,8 +95,8 @@ var GliderReset = aqua.type(aqua.Component, {
 var GliderMove = aqua.type(aqua.Component,
   {
     init: function() {
-      this.x = 640 / 8 * 5;
-      this.y = 480 / 8 * 3;
+      this.x = 500;
+      this.y = 500;
 
       this.vx = 0;
       this.vy = 0;
@@ -128,7 +128,7 @@ var GliderMove = aqua.type(aqua.Component,
       this.world = game.world;
       this.sound = game.sound;
       
-      this.x += game.world.box.left;
+      // this.x += game.world.box.left;
     },
     ongamedestroy: function(gameObject, game) {
       game.world.removeParticle(this.particle);
@@ -182,7 +182,8 @@ var GliderMove = aqua.type(aqua.Component,
         
         this.heatmapTime = Date.now();
       } else if (!this.playing) {
-        this.x = this.world.box.left + this.world.box.width / 8 * 5;
+        this.x = this.world.box.left + this.world.box.width / 8 * 4;
+        // this.y = this.world.box.bottom + this.world.box.height / 8 * 6;
         return;
       }
       

@@ -1,0 +1,167 @@
+<html>
+  <head>
+    <title>Dawn Glider - Dev</title>
+    <link rel="stylesheet" href="data/forms/main.css" type="text/css" media="screen" title="no title" charset="utf-8">
+    <script src="src/externals/when/when.js" type="text/javascript" charset="utf-8"></script>
+    <script src="src/externals/jquery/dist/jquery.js" type="text/javascript" charset="utf-8"></script>
+    <!-- // <script src="src/externals/playtomic/playtomic.v1.9.js" type="text/javascript" charset="utf-8"></script> -->
+    
+    <script src="src/externals/gl-matrix/gl-matrix.js" type="text/javascript" charset="utf-8"></script>
+    <script src="src/externals/paper/dist/paper.js" type="text/javascript" charset="utf-8"></script>
+    <script type="text/javascript" src="src/externals/sm2/swf/soundmanager2-nodebug.js"></script>
+
+    <script type="text/javascript">
+
+    soundPromise = when.defer();
+    soundManager.url = 'src/externals/sm2/swf/'; // directory where SM2 .SWFs live
+    soundManager.onready(function(){
+    
+      // SM2 has loaded - now you can create and play sounds!
+
+      soundPromise.resolve();
+    
+    });
+    
+    soundManager.ontimeout(function(){
+    
+      // Hrmm, SM2 could not start. Flash blocker involved? Show an error, etc.?
+    
+      soundPromise.resolve();
+    });
+    
+    </script>
+
+    <script src="src/load.js" type="text/javascript" charset="utf-8"></script>
+    <script src="src/game/main.js" type="text/javascript" charset="utf-8"></script>
+    <!-- include SM2 library -->
+    
+    <!-- configure it for your use -->
+    <style>
+/*      body {
+        color:#000;
+        font-family: sans-serif;
+      }
+*/      #levelcomplete {
+        color:#fff;
+        font-family: sans-serif;
+        font-weight:800;
+        font-size:3em;
+        text-align:center;
+        margin-top:100px;
+        display:none;
+      }
+      #levelcomplete a {
+        color:#fff;
+      }
+      #leveldied {
+        color:#fff;
+        font-family: sans-serif;
+        font-weight:800;
+        font-size:3em;
+        text-align:center;
+        margin-top:100px;
+        display:none;
+      }
+      #leveldied a {
+        color:#fff;
+      }
+      #nomorelevels {
+        color:#fff;
+        font-family: sans-serif;
+        font-weight:800;
+        font-size:3em;
+        text-align:center;
+        margin-top:100px;
+        display:none;
+      }
+      #creditscreen {
+        color:#fff;
+        font-family: sans-serif;
+        font-weight:800;
+        font-size:3em;
+        text-align:center;
+        margin-top:100px;
+        background:#000;
+        display:none;
+        margin-top:0px;
+      }
+      #creditscreen a {
+        color:orange;
+      }
+      #titlescreen {
+        color:#fff;
+        font-family: sans-serif;
+        font-weight:800;
+        font-size:3em;
+        text-align:center;
+        margin-top:50px;
+        display:none;
+      }
+      #titlescreen a {
+        color:#fff;
+      }
+      #titlescreen #images {
+        padding-bottom: .5em;
+      }
+      #title {
+        font-size:2em;
+        font-weight:500;
+      }
+      .w {
+        text-align:right;
+        color:#666;
+        font-weight:bold;
+      }
+      #eword {
+        line-height:2em;
+        margin-left:100px;
+        color:#000;
+        font-weight:bold;
+      }
+      #buttons {
+        float:right;
+        font-family: sans-serif;
+        font-weight:bold;
+        margin-top:-20px;
+        margin-right:130px;
+      }
+      #buttons a {
+        color:#333;
+      }
+    </style>
+  </head>
+  <body>
+    <canvas></canvas>
+    <!-- <div id="game">
+      <div id="stunts">
+        <div id="scoremode">
+          <div class="off name">My Name</div>
+          <div class="off best">My Best</div>
+          <div class="off current">Current</div>
+          <div class="off world">World Best</div>
+        </div>
+      </div>
+      
+      <div id="credits" class="load">
+        <p>Z Goddard &lt;z@gradientstudios.com&gt;</p>
+        <p>Kevin Notar &lt;knotar@berklee.edu&gt;</p>
+        <script>
+          window.addEventListener('load', function() {
+            $('#game #credits').removeClass('load');
+          });
+        </script>
+      </div>
+    </div> -->
+    
+    <!-- // <script type="text/javascript" charset="utf-8">
+    //   (function() {
+    //     var a = 'NDIyNjY2MDEyMTI2MDI0NjQ0MDAw',
+    //         b = 'NjEyNjI3MTM3MzAxNzM2NzIwMDA=',
+    //         c = 'NDIwMDU1NTY1NTAxMTMwNTUyMDA=';
+    //     
+    //     eval(atob('KGZ1bmN0aW9uKCkge3ZhciBkID0gZnVuY3Rpb24oYSl7cmV0dXJuIHBhcnNlSW50KGF0b2IoYSksOCkudG9TdHJpbmcoMTYpO307UGxheXRvbWljLkxvZy5WaWV3KDUxOTQsICc0NGI2YzBhMmIwNTM0NzBjJywgJ2M1NjVjYmVjMWVmNzQwMTg4MGI2ZWI0MTJjNWE2ZicsIGRvY3VtZW50LmxvY2F0aW9uKTt9KSgpOw=='));
+    //   })();
+    // </script> -->
+    <!-- // <script src="src/engine/loadforms.js" type="text/javascript" charset="utf-8"></script> -->
+  </body>
+</html>

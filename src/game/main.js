@@ -12,7 +12,8 @@ load.module('game/main.js',
       return when.all([
         load.script( 'game/glider.js' ),
         load.script( 'game/jet.js' ),
-        load.script( 'game/planet.js' )
+        load.script( 'game/planet.js' ),
+        load.script( 'game/mail.js' )
         // load.script('game/ship.js'),
         // load.script('game/enemy.js'),
         // load.script('game/level.js'),
@@ -131,6 +132,12 @@ aqua.game.world.add( glider.Jet.create(
     0
   ] ) );
 
+for ( var i = 0; i < 20; i++ ) {
+var mail = aqua.GameObject.create();
+mail.add( glider.Mail.create([Math.random()*1500, Math.random()*1500, 0]));
+mail.add( glider.MailRender.create());
+aqua.game.add(mail);
+}
 
 aqua.game.graphics.addDrawCall(aqua.PriorityItem.create(function(graphics, gl) {
   // graphics setup (once)

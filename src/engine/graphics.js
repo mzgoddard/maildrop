@@ -112,6 +112,108 @@ function(){
         num = num || 0;
         
         
+      },
+
+      drawSquare: function(options) {
+        // console.log(options);
+        var useCache = !!options.cache,
+            buffer = useCache ? options.cache.buffer : false,
+            arrayBuffer = useCache ? options.cache.array : false,
+            floatView = useCache ? options.cache.view : false,
+            gl = this.gl;
+        
+        if ( !buffer ) {
+          buffer = gl.createBuffer();
+          arrayBuffer = new ArrayBuffer(4 * 4 * 6);
+          floatView = new Float32Array(arrayBuffer);
+
+          if ( useCache ) {
+            options.cache.buffer = buffer;
+            options.cache.array = arrayBuffer;
+            options.cache.view = floatView;
+          }
+        }
+      
+        var angle = options.angle,
+            // cos = Math.cos(angle),
+            // sin = Math.sin(angle),
+            // cosh = Math.cos(angle+Math.PI/2),
+            // sinh = Math.sin(angle+Math.PI/2),
+            x = options.center[ 0 ],
+            y = options.center[ 1 ],
+            w = options.size[ 0 ] / 2,
+            h = options.size[ 1 ] / 2,
+            // w2 = options.size[ 0 ] / 2,
+            // h2 = options.size[ 1 ] / 2,
+            l = Math.mag(w, h),
+            a = Math.atan2(h, w),
+            cos = Math.cos(angle+a),
+            sin = Math.sin(angle+a),
+            cosh = Math.cos(angle-a),
+            sinh = Math.sin(angle-a),
+            cos3 = Math.cos(angle+Math.PI+a),
+            sin3 = Math.sin(angle+Math.PI+a),
+            cos4 = Math.cos(angle+Math.PI-a),
+            sin4 = Math.sin(angle+Math.PI-a),
+            shader = this.shaders.basic;
+      
+        // gl.disable(gl.BLEND);
+      
+        this.useShader('basic');
+      
+        if (!shader.matrixLocation) {
+          shader.matrixLocation = gl.getUniformLocation(shader.program, 'modelview_projection');
+          shader.texture0Location = gl.getUniformLocation(shader.program, 'texture0');
+          shader.colorLocation = gl.getUniformLocation(shader.program, 'color');
+        
+          shader.positionLocation = gl.getAttribLocation(shader.program, 'a_position');
+          shader.texcoord0Location = gl.getAttribLocation(shader.program, 'a_texcoord0');
+        
+          gl.enableVertexAttribArray(shader.positionLocation);
+          gl.enableVertexAttribArray(shader.texcoord0Location);
+        }
+
+        floatView[0] = x + cos * l;
+        floatView[1] = y + sin * l;
+      
+        floatView[4] = x + cosh * l;
+        floatView[5] = y + sinh * l;
+      
+        // floatView[8] = floatView[4] + Math.cos(angle - Math.PI / 4 * 3) * radius / 3 * 2 * Math.lerp(0.7, 1, Math.random());
+        // floatView[9] = floatView[5] + Math.sin(angle - Math.PI / 4 * 3) * radius / 3 * 2 * Math.lerp(0.7, 1, Math.random());
+
+        floatView[8] = x + cos3 * l;
+        floatView[9] = y + sin3 * l;
+
+        floatView[12] = floatView[0];
+        floatView[13] = floatView[1];
+
+        floatView[16] = floatView[8];
+        floatView[17] = floatView[9];
+
+        floatView[20] = x + cos4 * l;
+        floatView[21] = y + sin4 * l;
+
+        console.log(floatView, w, h);
+
+        // floatView[]
+
+        gl.bindBuffer(gl.ARRAY_BUFFER, buffer);
+        gl.bufferData(gl.ARRAY_BUFFER, floatView, gl.DYNAMIC_DRAW);
+      
+        gl.uniformMatrix4fv(shader.matrixLocation, false, this.projection);
+        gl.uniform4f(shader.colorLocation, 255 / 255, 90 / 255, 48 / 255, 255 / 255);
+        gl.uniform1i(shader.texture0Location, 0);
+      
+        gl.vertexAttribPointer(shader.positionLocation, 2, gl.FLOAT, false, 4 * 4, 0);
+        gl.vertexAttribPointer(shader.texcoord0Location, 2, gl.FLOAT, false, 4 * 4, 2 * 4);
+      
+        gl.drawArrays(gl.TRIANGLES, 0, 6);
+      },
+      destroyCache: function(cache) {
+        if ( cache.buffer ) {
+          this.gl.deleteBuffer( cache );
+        }
       }
     }
   );

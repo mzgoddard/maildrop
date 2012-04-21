@@ -451,6 +451,11 @@ var World = aqua.type(aqua.GameObject,
       for ( i = 0; i < count; i++ ) {
         p = particles[i];
 
+        if ( p.ignoreGravity ) {
+          p.integrate(dt);
+          continue;
+        }
+
         var tmp = [ 0, 0, 0];
         var gravity =
           6.674e-4 *

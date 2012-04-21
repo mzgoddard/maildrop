@@ -137,7 +137,8 @@ var Particle = aqua.type(aqua.Emitter,
         bvx = b.lx - b.x,
         bvy = b.ly - b.y,
         bvm = Math.mag(bvx, bvy),
-        fric = Math.abs(c.distance) * (avm + bvm > 50 ? 0.1 : a.friction * b.friction);
+        fric = Math.abs(c.distance) * (// avm + bvm > 50 ? 0.1 : 
+          a.friction * b.friction);
         // fric = Math.abs(c.distance) * (avm + bvm > 10 ? 0.99 : a.friction * b.friction);
 
       // if (avm + bvm < 30) {
@@ -368,6 +369,8 @@ var World = aqua.type(aqua.GameObject,
       this.collision = {};
       this.box = box;
       this.gravity = [0, 0, 0];
+      this.gravityPosition = [ 500, 500, 0 ];
+      this.gravityMass = 1e5;
       
       this.fixedDelta = 1 / 50;
       this.timeToPlay = 0;
@@ -419,6 +422,23 @@ var World = aqua.type(aqua.GameObject,
         this.step(fixedDelta);
       }
     },
+    calcGravity: function( p, mass ) {
+      var tmp = [ 0, 0, 0];
+      var gravity = (
+        6.674e-3 *
+        ( mass * this.gravityMass ) /
+        vec3.length( vec3.subtract( p, this.gravityPosition, tmp ) ) );
+      // vec3.add(p.acceleration, this.gravity, p.acceleration);
+      return (
+        vec3.scale(
+          vec3.normalize(
+            vec3.subtract(
+              this.gravityPosition,
+              p,
+              tmp ), tmp ),
+          gravity,
+          tmp ) );
+    },
     step: function(dt) {
       var particles = this.particles,
           collision = this.collision, 
@@ -431,7 +451,24 @@ var World = aqua.type(aqua.GameObject,
       for ( i = 0; i < count; i++ ) {
         p = particles[i];
 
-        vec3.add(p.acceleration, this.gravity, p.acceleration);
+        var tmp = [ 0, 0, 0];
+        var gravity =
+          6.674e-4 *
+          ( p.mass * this.gravityMass ) /
+          vec3.length( vec3.subtract( p.position, this.gravityPosition, tmp ) );
+        // vec3.add(p.acceleration, this.gravity, p.acceleration);
+        vec3.add(
+          p.acceleration,
+          vec3.scale(
+            vec3.normalize(
+              vec3.subtract(
+                this.gravityPosition,
+                p.position,
+                tmp ), tmp ),
+            gravity,
+            tmp ),
+          p.acceleration );
+        // console.log( p.position, this.gravityPosition, vec3.length( vec3.subtract( p.position, this.gravityPosition ) ), p.acceleration );
 
         p.integrate(dt);
       }
@@ -504,6 +541,129 @@ var World = aqua.type(aqua.GameObject,
   }
 );
 
+var WorldRenderer = aqua.type(aqua.Renderer,
+  {
+    onadd: function(gameObject) {
+      this.world = gameObject;
+    },
+    draw: function(graphics, gl) {
+      if (!this.shader) {
+        graphics.addShader({
+          'name': 'a_color',
+          'path': 'shaders/a_color'
+        });
+        
+        this.shader = graphics.shaders.a_color;
+      }
+
+      if (!this.shader.program) {
+        return;
+      }
+
+      if (!this.buffer) {
+        this.buffer = gl.createBuffer();
+        gl.bindBuffer(gl.ARRAY_BUFFER, this.buffer);
+        gl.bufferData(gl.ARRAY_BUFFER, this.world.particles.length * 6 * 16, gl.DYNAMIC_DRAW);
+      }
+
+      var arrayBuffer = new ArrayBuffer(this.world.particles.length * 6 * 16),
+          floatView = new Float32Array(arrayBuffer),
+          byteView = new Uint8Array(arrayBuffer),
+          particles = this.world.particles,
+          p,
+          
+          delta = this.world.fixedDelta,
+
+          shader = this.shader,
+
+          buffer = this.buffer,
+          count = particles.length,
+
+          i,
+          j,
+          offset = 0, // in bytes
+          particleArray,
+          x, y, r,
+          lx, ly, d,
+          red,green,blue,alpha;
+
+      if (!shader.matrixLocation) {
+        shader.matrixLocation = gl.getUniformLocation(shader.program, 'modelview_projection');
+
+        shader.positionLocation = gl.getAttribLocation(shader.program, 'a_position');
+        shader.colorLocation = gl.getAttribLocation(shader.program, 'a_color');
+
+        gl.enableVertexAttribArray(shader.positionLocation);
+        gl.enableVertexAttribArray(shader.colorLocation);
+      }
+      
+      for ( i = 0; i < count; i++ ) {
+        p = particles[i];
+        x = p.x; y = p.y; r = p.radius;
+        
+        if ( !p.isTrigger ) {
+        for ( j = 0; j < 24; j++ ) {
+          if (j % 4 === 0) {
+            floatView[offset + j] = x + (j % 8 > 3 ? 1 : -1) * r;
+          } else if (j % 4 == 1) {
+            floatView[offset + j] = y + (((j - 1) / 4 == 2 || (j - 1) / 4 == 4 || (j - 1) / 4 == 5) ? 1 : -1) * r;
+          }
+        }
+        }
+        
+        offset += 24;
+      }
+      
+      offset = 0;
+      for ( i = 0; i < count; i++ ) {
+        p = particles[i];
+        if (!p.isTrigger) {
+
+          x = p.x; y = p.y; lx = p.lx; ly = p.ly;
+          d = Math.mag(x-lx,y-ly) * 2 / 15;
+
+          red = Math.clamp(d * 255, 0, 218);
+          green = Math.clamp(d * 255, 0, 43);
+          blue = Math.clamp(d * 255, 0, 58);
+          alpha = Math.clamp(d * 255, 0, 255);
+        }else {
+          red = green = blue = alpha = 0;
+        }
+
+        // if ( i % 16 > 11 && p.isTrigger ) {
+        //   byteView[i] = 0;
+        //   continue;
+        // }
+        // if ( i % 16 > 11 ) {
+        //     x = p.x, y = p.y, lx = p.lx, ly = p.ly;
+        // }
+        for ( j = 0; j < 96; j += 16 ) {
+          byteView[offset + j + 12] = red;
+          byteView[offset + j + 13] = green;
+          byteView[offset + j + 14] = blue;
+          byteView[offset + j + 15] = alpha;
+        }
+        
+        offset += 96;
+      }
+      
+      gl.enable(gl.BLEND);
+      
+      graphics.useShader('a_color');
+      
+      gl.bindBuffer(gl.ARRAY_BUFFER, buffer);
+      gl.bufferData(gl.ARRAY_BUFFER, arrayBuffer, gl.DYNAMIC_DRAW);
+      
+      gl.uniformMatrix4fv(shader.matrixLocation, false, graphics.projection);
+      
+      gl.vertexAttribPointer(shader.positionLocation, 2, gl.FLOAT, false, 4 * 4, 0);
+      gl.vertexAttribPointer(shader.colorLocation, 4, gl.UNSIGNED_BYTE, true, 4 * 4, 3 * 4);
+      
+      gl.drawArrays(gl.TRIANGLES, 0, arrayBuffer.byteLength / 16);
+    }
+  }
+);
+
 var PaperRenderer = aqua.type(aqua.Component,
   {
     onadd: function(gameObject) {
@@ -538,6 +698,7 @@ var PaperRenderer = aqua.type(aqua.Component,
 
 aqua.Particle = Particle;
 aqua.World = World;
+aqua.World.Renderer = WorldRenderer;
 aqua.World.PaperRenderer = PaperRenderer;
 aqua.Box = Box;
 

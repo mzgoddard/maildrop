@@ -77,6 +77,7 @@ var GliderInput = aqua.type(aqua.Component,
 var GliderReset = aqua.type(aqua.Component, {
   init: function(map) {
     this.inputMap = map.inputMap || map;
+    this.fired = false;
   },
   ongameadd: function(gameObject, game) {
     this._keydown = this.keydown.bind(this);
@@ -84,10 +85,11 @@ var GliderReset = aqua.type(aqua.Component, {
     this.game = game;
   },
   keydown: function(e) {
-    if (this.inputMap[e.keyCode] == 'up') {
+    if (this.inputMap[e.keyCode] == 'up' && !this.fired) {
       window.removeEventListener('keydown', this._keydown);
       this.game.add(glider.makeGlider());
       this.game.destroy(this.gameObject);
+      this.fired = true;
     }
   }
 });
@@ -95,8 +97,8 @@ var GliderReset = aqua.type(aqua.Component, {
 var GliderMove = aqua.type(aqua.Component,
   {
     init: function() {
-      this.x = 640 / 8 * 5;
-      this.y = 480 / 8 * 3;
+      this.x = 500;
+      this.y = 500;
 
       this.vx = 0;
       this.vy = 0;
@@ -107,14 +109,18 @@ var GliderMove = aqua.type(aqua.Component,
       this.angle = 0;
 
       this.radius = 25;
-      
+
       this.score = 0;
-      
+
       this.particle = aqua.Particle.create([this.x, this.y, 0], this.radius, 1);
       this.particle.isTrigger = true;
       this.particle.on('collision', this.oncollision.bind(this));
-      
+
       this.playing = false;
+
+      this.timeToLastCollision = 0;
+      this.crashTimer = -1;
+      this.maxCrashTimer = 2;
     },
     onadd: function(gameObject) {
       this.input = gameObject.get(GliderInput);
@@ -128,7 +134,7 @@ var GliderMove = aqua.type(aqua.Component,
       this.world = game.world;
       this.sound = game.sound;
       
-      this.x += game.world.box.left;
+      // this.x += game.world.box.left;
     },
     ongamedestroy: function(gameObject, game) {
       game.world.removeParticle(this.particle);
@@ -146,6 +152,23 @@ var GliderMove = aqua.type(aqua.Component,
     oncollision: function(otherParticle, collision) {
       if (!this.playing) return;
       
+      if ( otherParticle.isPlanet ) {
+        this.crashTimer = 0;
+        this.particle.isTrigger = false;
+        var fixedDelta = aqua.game.timing.fixedDelta,
+            self = this;
+        aqua.game.task(function() {
+          self.particle.mass = 1e3;
+          self.particle.friction = 1;
+          // self.particle.lastPosition[ 0 ] = self.particle.position[ 0 ] - self.vx * fixedDelta;
+          // self.particle.lastPosition[ 1 ] = self.particle.position[ 1 ] - self.vy * fixedDelta;
+        }, aqua.Game.Priorities.GARBAGE, false, true);
+        // this.particle.lastPosition[ 0 ] = this.particle.position[ 0 ] - this.vx * fixedDelta;
+        // this.particle.lastPosition[ 1 ] = this.particle.position[ 1 ] - this.vy * fixedDelta;
+        // console.log( this.particle.position, this.particle.lastPosition );
+        return;
+      }
+
       var delta = aqua.game.timing.fixedDelta,
           vx = otherParticle.lastPosition[0] - otherParticle.position[0],
           vy = otherParticle.lastPosition[1] - otherParticle.position[1],
@@ -161,15 +184,36 @@ var GliderMove = aqua.type(aqua.Component,
       while (va < -Math.PI)
         va += Math.PI * 2;
 
-      var k = vl,
+      var k = vl * 10,
           n = k * 
             Math.cos(va + Math.PI - this.angle - Math.PI / 2) * 
             (Math.abs(va - this.angle) < Math.PI / 2 ? 1 : 0),
+            // nx = 0, ny = 0;
           nx = Math.cos(this.angle+Math.PI/2) * n,
-          ny = Math.sin(this.angle+Math.PI/2) * n * 2;
+          ny = Math.sin(this.angle+Math.PI/2) * n;
           // console.log(nx, ny);
+          
+      n = k * 
+        Math.sin(va + Math.PI - this.angle - Math.PI / 2) *
+        (Math.abs(va - this.angle) > Math.PI / 2 ? 1 : 0);
+      nx += Math.cos(this.angle+Math.PI) * n;
+      ny += Math.sin(this.angle+Math.PI) * n;
+
       this.ax += Math.clamp(nx, -10, 1000);
       this.ay += ny;
+
+      this.timeToLastCollision = 0;
+    },
+    destruct: function() {
+      this.gameObject.game.destroy(this.gameObject);
+        
+      if ( !this.resetCreated ) {
+        var resetObject = aqua.GameObject.create();
+        resetObject.add(GliderReset.create(this.gameObject.get(GliderInput)));
+        this.gameObject.game.add(resetObject);
+
+        this.resetCreated = true;
+      }
     },
     fixedUpdate: function() {
       if (!this.playing && this.input.get('up')) {
@@ -182,10 +226,23 @@ var GliderMove = aqua.type(aqua.Component,
         
         this.heatmapTime = Date.now();
       } else if (!this.playing) {
-        this.x = this.world.box.left + this.world.box.width / 8 * 5;
+        this.x = this.world.box.left + this.world.box.width / 8 * 4;
+        this.y = this.world.box.bottom + this.world.box.height / 8 * 6;
         return;
       }
-      
+
+      if ( !this.particle.isTrigger ) {
+        this.crashTimer += aqua.game.timing.fixedDelta;
+        this.x = this.particle.position[ 0 ];
+        this.y = this.particle.position[ 1 ];
+
+        if ( this.crashTimer > this.maxCrashTimer ) {
+          this.destruct();
+        }
+
+        return;
+      }
+
       var delta = aqua.game.timing.fixedDelta,
           vl = Math.sqrt(this.vx*this.vx+this.vy*this.vy),
           va = Math.atan2(this.vy, this.vx);
@@ -195,9 +252,13 @@ var GliderMove = aqua.type(aqua.Component,
       while (va < -Math.PI)
         va += Math.PI * 2;
 
-      this.ay -= 16;
+      // gravity
+      var gravity = this.gameObject.game.world.calcGravity( [ this.x, this.y, 0 ], 10 );
+      // console.log( gravity );
+      this.ax += gravity[ 0 ];
+      this.ay += gravity[ 1 ];
 
-      var k = vl * 2,
+      var k = vl * 10,
           n = k * Math.cos(va + Math.PI - this.angle - Math.PI / 2) * (Math.abs(va - this.angle) < Math.PI / 2 ? 1 : 0),
           nx = Math.cos(this.angle+Math.PI/2) * n,
           ny = Math.sin(this.angle+Math.PI/2) * n;
@@ -216,6 +277,14 @@ var GliderMove = aqua.type(aqua.Component,
           this.ax += Math.cos(this.angle) * 50;
           this.ay += Math.sin(this.angle) * 200;
         }
+      }
+
+      if ( ( this.timeToLastCollision += delta ) > 1 ) {
+        $('#booster').text('BOOSTERS: ON');
+        this.ax += Math.cos(this.angle) * 100;
+        this.ay += Math.sin(this.angle) * 100;
+      } else {
+        $('#booster').text('BOOSTERS: OFF');
       }
 
       // integrate
@@ -306,11 +375,7 @@ var GliderMove = aqua.type(aqua.Component,
         
         // Playtomic.Log.Heatmap('Death', '0001', this.x - this.world.box.left, this.y);
         
-        this.gameObject.game.destroy(this.gameObject);
-        
-        var resetObject = aqua.GameObject.create();
-        resetObject.add(GliderReset.create(this.gameObject.get(GliderInput)));
-        this.gameObject.game.add(resetObject);
+        this.destruct();
       }
     }
   }
@@ -727,7 +792,7 @@ var GliderRender = aqua.type(aqua.Component,
     draw: function(graphics, gl) {
       if (!this.buffer) {
         this.buffer = gl.createBuffer();
-        this.arrayBuffer = new ArrayBuffer(4 * 4 * 3);
+        this.arrayBuffer = new ArrayBuffer(4 * 4 * 6);
         this.floatView = new Float32Array(this.arrayBuffer);
       }
       
@@ -738,7 +803,7 @@ var GliderRender = aqua.type(aqua.Component,
           radius = this.move.radius,
           shader = graphics.shaders.basic;
       
-      gl.disable(gl.BLEND);
+      // gl.disable(gl.BLEND);
       
       graphics.useShader('basic');
       
@@ -760,20 +825,34 @@ var GliderRender = aqua.type(aqua.Component,
       floatView[4] = x + Math.cos(angle + Math.PI) * radius;
       floatView[5] = y + Math.sin(angle + Math.PI) * radius;
       
-      floatView[8] = floatView[4] + Math.cos(angle - Math.PI / 4 * 3) * radius / 3 * 2 * Math.lerp(0.7, 1, Math.random());
-      floatView[9] = floatView[5] + Math.sin(angle - Math.PI / 4 * 3) * radius / 3 * 2 * Math.lerp(0.7, 1, Math.random());
-      
+      // floatView[8] = floatView[4] + Math.cos(angle - Math.PI / 4 * 3) * radius / 3 * 2 * Math.lerp(0.7, 1, Math.random());
+      // floatView[9] = floatView[5] + Math.sin(angle - Math.PI / 4 * 3) * radius / 3 * 2 * Math.lerp(0.7, 1, Math.random());
+
+      floatView[8] = floatView[4] + Math.cos(angle + Math.PI / 4 * 3) * radius / 3 * 2;
+      floatView[9] = floatView[5] + Math.sin(angle + Math.PI / 4 * 3) * radius / 3 * 2;
+
+      floatView[12] = floatView[0];
+      floatView[13] = floatView[1];
+
+      floatView[16] = floatView[8];
+      floatView[17] = floatView[9];
+
+      floatView[20] = floatView[0] + Math.cos(angle + Math.PI / 4 * 3) * radius / 3 * 4;
+      floatView[21] = floatView[1] + Math.sin(angle + Math.PI / 4 * 3) * radius / 3 * 4;
+
+      // floatView[]
+
       gl.bindBuffer(gl.ARRAY_BUFFER, this.buffer);
       gl.bufferData(gl.ARRAY_BUFFER, floatView, gl.DYNAMIC_DRAW);
       
       gl.uniformMatrix4fv(shader.matrixLocation, false, graphics.projection);
-      gl.uniform4f(shader.colorLocation, 255 / 255, 90 / 255, 48 / 255, 255 / 255);
+      gl.uniform4f(shader.colorLocation, 255 / 255, 90 / 255, 48 / 255, 255 / 255 * ( this.move.crashTimer >= 0 ? ( this.move.maxCrashTimer - this.move.crashTimer ) / this.move.maxCrashTimer : 1 ));
       gl.uniform1i(shader.texture0Location, 0);
       
       gl.vertexAttribPointer(shader.positionLocation, 2, gl.FLOAT, false, 4 * 4, 0);
       gl.vertexAttribPointer(shader.texcoord0Location, 2, gl.FLOAT, false, 4 * 4, 2 * 4);
       
-      gl.drawArrays(gl.TRIANGLES, 0, 3);
+      gl.drawArrays(gl.TRIANGLES, 0, 6);
     }
   }
 );

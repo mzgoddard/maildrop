@@ -124,3 +124,9 @@ body {
 .zone {
   right: -6px;
 }
+
+#hud {
+  position: absolute;
+  top: 0;
+  color: white;
+}

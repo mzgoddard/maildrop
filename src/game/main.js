@@ -10,7 +10,9 @@ load.module('game/main.js',
   load.chain(load.script('engine/init.js'),
     function() {
       return when.all([
-        load.script( 'game/glider.js' )
+        load.script( 'game/glider.js' ),
+        load.script( 'game/jet.js' ),
+        load.script( 'game/planet.js' )
         // load.script('game/ship.js'),
         // load.script('game/enemy.js'),
         // load.script('game/level.js'),
@@ -59,9 +61,24 @@ aqua.game.task(function() {
   aqua.game.timing.last = now;
 }, -10);
 
-aqua.game.world = aqua.World.create(aqua.Box.create(1000, 1000, 0, 0));
+aqua.game.world = aqua.World.create(aqua.Box.create(1500, 1500, 0, 0));
+
 aqua.game.add(aqua.game.world);
 // aqua.game.world.add(aqua.World.PaperRenderer.create());
+aqua.game.world.add(aqua.World.Renderer.create());
+
+var planet = aqua.Particle.create([
+  aqua.game.world.box.width / 2,
+  aqua.game.world.box.height / 2,
+  0 ], 50, 1);
+aqua.game.world.gravityPosition = planet.position;
+planet.isStatic = true;
+planet.isPlanet = true;
+aqua.game.world.addParticle(planet);
+
+var planetRenderer = aqua.GameObject.create();
+planetRenderer.add(glider.ParticleRenderer.create(planet));
+aqua.game.add(planetRenderer);
 
 // aqua.game.player = btb.makeShip();
 // aqua.game.add(aqua.game.player);
@@ -73,14 +90,47 @@ aqua.game.add(aqua.game.player);
 // aqua.game.levelManager = btb.LevelManager.makeLevelManager();
 // aqua.game.add(aqua.game.levelManager);
 
-// for ( var idx = 0; idx < 500; idx++ )
-//   aqua.game.world.addParticle(
-//     aqua.Particle.create([
-//         640 * (idx / 500),
-//         Math.random()*480,
-//         0],
-//       15+Math.random()*3,
-//       1));
+for ( var idx = 0; idx < 500; idx++ )
+  aqua.game.world.addParticle(
+    aqua.Particle.create([
+        aqua.game.world.box.width * (idx / 500),
+        Math.random()*aqua.game.world.box.width,
+        0],
+      15+Math.random()*3,
+      1));
+
+// var jet = aqua.GameObject.create();
+aqua.game.world.add( glider.Jet.create(
+  [
+    planet.position[0] + Math.cos(Math.PI/6) * planet.radius * 2,
+    planet.position[1] + Math.sin(Math.PI/6) * planet.radius * 2,
+    0 ],
+  [
+    Math.cos(Math.PI/6) * 6000,
+    Math.sin(Math.PI/6) * 6000,
+    0
+  ] ) );
+aqua.game.world.add( glider.Jet.create(
+  [
+    planet.position[0] + Math.cos(Math.PI/6*5) * planet.radius * 2,
+    planet.position[1] + Math.sin(Math.PI/6*5) * planet.radius * 2,
+    0 ],
+  [
+    Math.cos(Math.PI/6*5) * 6000,
+    Math.sin(Math.PI/6*5) * 6000,
+    0
+  ] ) );
+aqua.game.world.add( glider.Jet.create(
+  [
+    planet.position[0] + Math.cos(Math.PI/6*9) * planet.radius * 2,
+    planet.position[1] + Math.sin(Math.PI/6*9) * planet.radius * 2,
+    0 ],
+  [
+    Math.cos(Math.PI/6*9) * 6000,
+    Math.sin(Math.PI/6*9) * 6000,
+    0
+  ] ) );
+
 
 aqua.game.graphics.addDrawCall(aqua.PriorityItem.create(function(graphics, gl) {
   // graphics setup (once)
@@ -92,16 +142,25 @@ aqua.game.graphics.addDrawCall(aqua.PriorityItem.create(function(graphics, gl) {
 
 aqua.game.graphics.addDrawCall(aqua.PriorityItem.create(function(graphics, gl) {
   var width = window.innerWidth,
-      height = window.innerHeight;
-  
+      height = window.innerHeight,
+      ratio = width / height;
+
   graphics.canvas.width = width;
   graphics.canvas.height = height;
   
   gl.viewport(0, 0, width, height);
+
+  var displayWidth = aqua.game.world.box.width * ( width / height );
+
   mat4.ortho(
-    aqua.game.world.box.left, aqua.game.world.box.width + aqua.game.world.box.left, 0, aqua.game.world.box.height, 0, 1000,
-    graphics.projection);
-  
+    -( displayWidth - aqua.game.world.box.width ) / 2,
+    -( displayWidth - aqua.game.world.box.width ) / 2 + displayWidth,
+    0,
+    aqua.game.world.box.height,
+    0,
+    1000,
+    graphics.projection );
+
   // graphics setup
   gl.clear(gl.COLOR_BUFFER_BIT);
   graphics.useShader('basic');

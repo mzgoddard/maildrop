@@ -368,6 +368,8 @@ var World = aqua.type(aqua.GameObject,
       this.collision = {};
       this.box = box;
       this.gravity = [0, 0, 0];
+      this.gravityPosition = [ 500, 500, 0 ];
+      this.gravityMass = 1e5;
       
       this.fixedDelta = 1 / 50;
       this.timeToPlay = 0;
@@ -419,6 +421,23 @@ var World = aqua.type(aqua.GameObject,
         this.step(fixedDelta);
       }
     },
+    calcGravity: function( p, mass ) {
+      var tmp = [ 0, 0, 0];
+      var gravity = (
+        6.674e-3 *
+        ( mass * this.gravityMass ) /
+        vec3.length( vec3.subtract( p, this.gravityPosition, tmp ) ) );
+      // vec3.add(p.acceleration, this.gravity, p.acceleration);
+      return (
+        vec3.scale(
+          vec3.normalize(
+            vec3.subtract(
+              this.gravityPosition,
+              p,
+              tmp ), tmp ),
+          gravity,
+          tmp ) );
+    },
     step: function(dt) {
       var particles = this.particles,
           collision = this.collision, 
@@ -431,7 +450,24 @@ var World = aqua.type(aqua.GameObject,
       for ( i = 0; i < count; i++ ) {
         p = particles[i];
 
-        vec3.add(p.acceleration, this.gravity, p.acceleration);
+        var tmp = [ 0, 0, 0];
+        var gravity =
+          6.674e-4 *
+          ( p.mass * this.gravityMass * 1e12 ) /
+          vec3.length( vec3.subtract( p.position, this.gravityPosition, tmp ) );
+        // vec3.add(p.acceleration, this.gravity, p.acceleration);
+        vec3.add(
+          p.acceleration,
+          vec3.scale(
+            vec3.normalize(
+              vec3.subtract(
+                this.gravityPosition,
+                p.position,
+                tmp ), tmp ),
+            gravity,
+            tmp ),
+          p.acceleration );
+        // console.log( p.position, this.gravityPosition, vec3.length( vec3.subtract( p.position, this.gravityPosition ) ), p.acceleration );
 
         p.integrate(dt);
       }

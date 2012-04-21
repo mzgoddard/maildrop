@@ -183,7 +183,7 @@ var GliderMove = aqua.type(aqua.Component,
         this.heatmapTime = Date.now();
       } else if (!this.playing) {
         this.x = this.world.box.left + this.world.box.width / 8 * 4;
-        // this.y = this.world.box.bottom + this.world.box.height / 8 * 6;
+        this.y = this.world.box.bottom + this.world.box.height / 8 * 6;
         return;
       }
       
@@ -196,9 +196,13 @@ var GliderMove = aqua.type(aqua.Component,
       while (va < -Math.PI)
         va += Math.PI * 2;
 
-      this.ay -= 16;
+      // gravity
+      var gravity = this.gameObject.game.world.calcGravity( [ this.x, this.y, 0 ], 10 );
+      console.log( gravity );
+      this.ax += gravity[ 0 ];
+      this.ay += gravity[ 1 ];
 
-      var k = vl * 2,
+      var k = vl * 10,
           n = k * Math.cos(va + Math.PI - this.angle - Math.PI / 2) * (Math.abs(va - this.angle) < Math.PI / 2 ? 1 : 0),
           nx = Math.cos(this.angle+Math.PI/2) * n,
           ny = Math.sin(this.angle+Math.PI/2) * n;

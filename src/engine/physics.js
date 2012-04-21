@@ -620,7 +620,7 @@ var WorldRenderer = aqua.type(aqua.Renderer,
         if (p.isTrigger) continue;
 
         x = p.x; y = p.y; lx = p.lx; ly = p.ly;
-        d = Math.mag(x-lx,y-ly) * 2;
+        d = Math.mag(x-lx,y-ly) * 2 + 10;
 
         red = Math.clamp(d / 50 * 255, 0, 218);
         green = Math.clamp(d / 50 * 255, 0, 43);

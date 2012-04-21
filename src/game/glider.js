@@ -146,12 +146,12 @@ var GliderMove = aqua.type(aqua.Component,
     oncollision: function(otherParticle, collision) {
       if (!this.playing) return;
       
-      {
+      if ( otherParticle.isPlanet ) {
         this.particle.isTrigger = false;
         var fixedDelta = aqua.game.timing.fixedDelta,
             self = this;
         aqua.game.task(function() {
-          // self.particle.mass = 1e3;
+          self.particle.mass = 1e3;
           self.particle.friction = 1;
           // self.particle.lastPosition[ 0 ] = self.particle.position[ 0 ] - self.vx * fixedDelta;
           // self.particle.lastPosition[ 1 ] = self.particle.position[ 1 ] - self.vy * fixedDelta;
@@ -177,12 +177,12 @@ var GliderMove = aqua.type(aqua.Component,
       while (va < -Math.PI)
         va += Math.PI * 2;
 
-      var k = vl,
+      var k = vl * 10,
           n = k * 
             Math.cos(va + Math.PI - this.angle - Math.PI / 2) * 
             (Math.abs(va - this.angle) < Math.PI / 2 ? 1 : 0),
           nx = Math.cos(this.angle+Math.PI/2) * n,
-          ny = Math.sin(this.angle+Math.PI/2) * n * 2;
+          ny = Math.sin(this.angle+Math.PI/2) * n;
           // console.log(nx, ny);
       this.ax += Math.clamp(nx, -10, 1000);
       this.ay += ny;

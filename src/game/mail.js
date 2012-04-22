@@ -224,6 +224,7 @@ glider.MailGoal = aqua.type(aqua.Component,
         console.log('mail!');
         otherParticle.mail.pickup();
         aqua.game.destroy( otherParticle.mail.gameObject );
+        otherParticle.mail.call('complete');
 
         if ( aqua.sound ) {
           aqua.sound.play( 'score' );
@@ -235,6 +236,117 @@ glider.MailGoal = aqua.type(aqua.Component,
       collision.solve = true;
     }
   });
+
+glider.MailWave = aqua.type( aqua.Component, {
+  init: function( options ) {
+    this.packets = [];
+    this.renderOptions = options.render || {};
+    this.options = options;
+  },
+  ongameadd: function( gameObject, game ) {
+    for ( var i = 0; i < this.options.count; i++ ) {
+      this.makePacket();
+    }
+  },
+  makePacket: function() {
+    var packet = aqua.GameObject.create(),
+        position, force,
+        side = Math.floor( Math.random() * 4 ),
+        self = this;
+
+    if ( side === 0 ) {
+      // top
+      position = [
+        Math.random() * aqua.game.world.box.width,
+        aqua.game.world.box.top,
+        0 ];
+      force = [
+        Math.random() * 20 - 10,
+        -20 + -Math.random() * 10,
+        0 ];
+    } else if ( side === 1 ) {
+      // right
+      position = [
+        aqua.game.world.box.right,
+        Math.random() * aqua.game.world.box.height,
+        0 ];
+      force = [
+        -20 + -Math.random() * 10,
+        Math.random() * 20 - 10,
+        0 ];
+    } else if ( side === 2 ) {
+      // bottom
+      position = [
+        Math.random() * aqua.game.world.box.width,
+        aqua.game.world.box.bottom,
+        0 ];
+      force = [
+        Math.random() * 20 - 10,
+        20 + Math.random() * 10,
+        0 ];
+    } else if ( side === 3 ) {
+      // left
+      position = [
+        aqua.game.world.box.left,
+        Math.random() * aqua.game.world.box.height,
+        0 ];
+      force = [
+        20 + Math.random() * 10,
+        Math.random() * 20 - 10,
+        0 ];
+    }
+    packet.add( glider.Mail.create( position, force ) );
+    packet.add( glider.MailRender.create( this.renderOptions ) );
+    aqua.game.add( packet );
+
+    packet = packet.get( glider.Mail );
+    this.packets.push( packet );
+
+    packet.on( 'complete', function() {
+      var index = self.packets.indexOf( packet );
+      if ( index != -1 ) {
+        self.packets.splice( index, 1 );
+        if ( self.packets.length === 0 ) {
+          self.call( 'complete' );
+        }
+      }
+    });
+  }
+});
+
+glider.WaveManager = aqua.type(aqua.Component, {
+  init: function( options ) {
+    this.waveCount = 0;
+    this.wave = null;
+    this.jets = [];
+    this.player = options.player;
+    this.planet = options.planet;
+
+    this.options = options;
+    this.waveOptions = options.waveOptions || {};
+  },
+  ongameadd: function() {
+    this.startWave();
+  },
+  startWave: function() {
+    this.wave = aqua.GameObject.create();
+    this.wave.add( glider.MailWave.create( this.waveOptions ) );
+    aqua.game.add( this.wave );
+
+    this.wave = this.wave.get( glider.MailWave );
+    this.wave.on( 'complete', this.endWave.bind( this ) );
+
+    this.waveCount ++;
+    $('#wave').text('WAVE: ' + this.waveCount);
+  },
+  endWave: function() {
+    aqua.game.destroy( this.wave.gameObject );
+    this.wave = null;
+
+    setTimeout( this.startWave.bind( this ), 5000 );
+  }
+});
+
 
 glider.Mail = Mail;
 glider.MailRender = MailRenderer;

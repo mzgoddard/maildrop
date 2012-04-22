@@ -164,12 +164,25 @@ aqua.game.world.add( glider.Jet.create(
     0
   ] ) );
 
-for ( var i = 0; i < 20; i++ ) {
+// for ( var i = 0; i < 20; i++ ) {
+// var mail = aqua.GameObject.create();
+// mail.add( glider.Mail.create([Math.random()*1500, Math.random()*1500, 0],[0,10,0]));
+// mail.add( glider.MailRender.create());
+// aqua.game.add(mail);
+// }
+
 var mail = aqua.GameObject.create();
-mail.add( glider.Mail.create([Math.random()*1500, Math.random()*1500, 0],[0,10,0]));
-mail.add( glider.MailRender.create());
-aqua.game.add(mail);
-}
+mail.add( glider.WaveManager.create({
+  planet: planet,
+  player: aqua.game.player,
+  waveOptions: {
+    count: 20
+    // render: {
+    //   color: 
+    // }
+  }
+}) );
+aqua.game.add( mail );
 
 var clearColor = aqua.color( aqua.colors.bg );
 aqua.game.graphics.addDrawCall(aqua.PriorityItem.create(function(graphics, gl) {

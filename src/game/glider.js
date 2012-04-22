@@ -362,22 +362,35 @@ var GliderMove = aqua.type(aqua.Component,
         this.world.box.contains([this.x+this.radius,this.y-this.radius]) ||
         this.world.box.contains([this.x-this.radius,this.y+this.radius]) ||
         this.world.box.contains([this.x-this.radius,this.y-this.radius]))) {
-        
-        if (aqua.game.score) {
-          if (this.world.box.bottom > this.y) {
-            aqua.game.score.addTrick('The World is Flat', 10000);
-          } else if (this.world.box.top < this.y) {
-            aqua.game.score.addTrick('To The Sky', 200000);
-          } else if (this.world.box.right < this.x) {
-            aqua.game.score.addTrick('Exit Stage Right', 1000000);
-          } else if (this.world.box.left > this.x) {
-            aqua.game.score.addTrick('Exit Stage Left', 100000);
-          }
+
+        if ( this.x < this.world.box.left ) {
+          this.x = this.world.box.right - this.radius;
         }
-        
-        // Playtomic.Log.Heatmap('Death', '0001', this.x - this.world.box.left, this.y);
-        
-        this.destruct();
+        else if ( this.x > this.world.box.right ) {
+          this.x = this.world.box.left + this.radius;
+        }
+        if ( this.y > this.world.box.top ) {
+          this.y = this.world.box.bottom + this.radius;
+        }
+        else if ( this.y < this.world.box.bottom ) {
+          this.y = this.world.box.top - this.radius;
+        }
+
+        // if (aqua.game.score) {
+        //   if (this.world.box.bottom > this.y) {
+        //     aqua.game.score.addTrick('The World is Flat', 10000);
+        //   } else if (this.world.box.top < this.y) {
+        //     aqua.game.score.addTrick('To The Sky', 200000);
+        //   } else if (this.world.box.right < this.x) {
+        //     aqua.game.score.addTrick('Exit Stage Right', 1000000);
+        //   } else if (this.world.box.left > this.x) {
+        //     aqua.game.score.addTrick('Exit Stage Left', 100000);
+        //   }
+        // }
+        // 
+        // // Playtomic.Log.Heatmap('Death', '0001', this.x - this.world.box.left, this.y);
+        // 
+        // this.destruct();
       }
     }
   }

@@ -58,7 +58,7 @@ load.json( 'sounds/sounds.json' ).then( function( sounds ) {
 //var path = new paper.Path.RoundRectangle(new paper.Rectangle(10, 10, 50, 50), new paper.Size(10, 10));
 //path.strokeColor = 'black';
 
-aqua.game.graphics = aqua.Graphics.create();
+// aqua.game.graphics = aqua.Graphics.create();
 aqua.game.graphics = aqua.initGraphics($('canvas')[0]);
 aqua.game.graphics.addShader({name: 'basic', path:'shaders/basic'});
 aqua.game.task(

@@ -10,7 +10,7 @@ var ArrayBuffer = window.ArrayBuffer,
 load.module('engine/physics.js', 
   when.all([
     load.script('engine/object.js'),
-    load.script('engine/paper_graphics.js'),
+    // load.script('engine/paper_graphics.js'),
     // load.script('engine/graphics.js'),
     load.script('engine/math.js')
   ]), function() {
@@ -681,42 +681,42 @@ var WorldRenderer = aqua.type(aqua.Renderer,
   }
 );
 
-var PaperRenderer = aqua.type(aqua.Component,
-  {
-    onadd: function(gameObject) {
-      this.world = gameObject;
-      if (!this.paths) {
-        this.paths = [];
-      }
-    },
-    lateUpdate: function() {
-      var i, path, particle;
-
-      for (i = this.paths.length; i < this.world.particles.length; i++) {
-        path = new paper.Path.Circle(new paper.Point(0, 0), 1);
-        path.fillColor = 'red';
-        path.currentSize = 1;
-        this.paths.push(path);
-      }
-      for (i = this.paths.length; i > this.world.particles.length; i--) {
-        this.paths.pop().remove();
-      }
-
-      for (i = 0; i < this.world.particles.length; i++) {
-        path = this.paths[i];
-        particle = this.world.particles[i];
-        path.scale(particle.radius / path.currentSize);
-        path.currentSize = particle.radius;
-        path.translate(new paper.Point(particle.position[0]-path.position.x, particle.position[1]-path.position.y));
-      }
-    }
-  }
-);
+// var PaperRenderer = aqua.type(aqua.Component,
+//   {
+//     onadd: function(gameObject) {
+//       this.world = gameObject;
+//       if (!this.paths) {
+//         this.paths = [];
+//       }
+//     },
+//     lateUpdate: function() {
+//       var i, path, particle;
+// 
+//       for (i = this.paths.length; i < this.world.particles.length; i++) {
+//         path = new paper.Path.Circle(new paper.Point(0, 0), 1);
+//         path.fillColor = 'red';
+//         path.currentSize = 1;
+//         this.paths.push(path);
+//       }
+//       for (i = this.paths.length; i > this.world.particles.length; i--) {
+//         this.paths.pop().remove();
+//       }
+// 
+//       for (i = 0; i < this.world.particles.length; i++) {
+//         path = this.paths[i];
+//         particle = this.world.particles[i];
+//         path.scale(particle.radius / path.currentSize);
+//         path.currentSize = particle.radius;
+//         path.translate(new paper.Point(particle.position[0]-path.position.x, particle.position[1]-path.position.y));
+//       }
+//     }
+//   }
+// );
 
 aqua.Particle = Particle;
 aqua.World = World;
 aqua.World.Renderer = WorldRenderer;
-aqua.World.PaperRenderer = PaperRenderer;
+// aqua.World.PaperRenderer = PaperRenderer;
 aqua.Box = Box;
 
 });

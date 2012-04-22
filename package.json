@@ -20,6 +20,8 @@
 		"colors": "*",
 		"zlib": "*",
 		"dateformat": "*",
-		"jsonlint": "*"
+		"jsonlint": "*",
+    "mkdirp": "*",
+    "sprintf": "*"
 	}
 }

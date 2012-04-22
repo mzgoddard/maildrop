@@ -1,4 +1,4 @@
-(function() {
+load.module('game/planet.js', load.script('engine/graphics.js'), function() {
   var PlanetRenderer = aqua.type( aqua.Renderer,
   {
     init: function(options) {
@@ -109,4 +109,4 @@
   });
 
   glider.ParticleRenderer = PlanetRenderer;
-})();
+});

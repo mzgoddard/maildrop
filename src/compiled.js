@@ -8,12 +8,11 @@
         'engine/object.js',
         'engine/graphics.js',
         'engine/physics.js',
-        // 'game/common.js',
-        // 'game/bullet.js',
-        // 'game/enemy.js',
-        // 'game/level.js',
-        // 'game/ship.js',
+        'engine/sound.js',
         'game/glider.js',
+        'game/jet.js',
+        'game/planet.js',
+        'game/mail.js',
         'game/main.js'
       ],
       i;

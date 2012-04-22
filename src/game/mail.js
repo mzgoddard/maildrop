@@ -1,4 +1,9 @@
-(function() {
+load.module(
+  'game/mail.js',
+  when.all([
+    load.script('engine/object.js'),
+    load.script('engine/graphics.js')]),
+function() {
 
 var Mail = aqua.type(aqua.Component,
 {
@@ -449,4 +454,4 @@ glider.Mail = Mail;
 glider.MailRender = MailRenderer;
 glider.MailManager = MailManager;
 
-})();
+});

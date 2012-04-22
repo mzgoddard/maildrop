@@ -10,6 +10,7 @@ var SoundContext = aqua.type(aqua.type.Base,
   {
     init: function() {
       this.promises = {};
+      this.nodes = {};
 
       if (window.webkitAudioContext) {
         this.context = new window.webkitAudioContext();

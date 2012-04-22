@@ -153,7 +153,7 @@ var MailManager = aqua.type(aqua.Component,
             vec3.add(
               planet.position,
               // [ 0, 0, 0, ],
-              [ cos * planet.radius, sin * planet.radius, 0 ],
+              [ cos * planet.radius * 0.8, sin * planet.radius * 0.8, 0 ],
               vec3.create() ),
           vectorToFar = vec3.direction(
             farPosition,
@@ -386,6 +386,8 @@ glider.WaveManager = aqua.type(aqua.Component, {
   endWave: function() {
     aqua.game.destroy( this.wave.gameObject );
     this.wave = null;
+
+    this.waveOptions.count *= 1.1;
 
     setTimeout( this.startWave.bind( this ), 5000 );
   }

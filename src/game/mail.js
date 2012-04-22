@@ -253,6 +253,8 @@ glider.MailGoal = aqua.type(aqua.Component,
       this.particle.on('collision', this.oncollision.bind(this));
 
       this.score = 0;
+      this.multiplier = 1;
+      this.multiplierTimer = 0;
       console.log('init');
     },
     ongameadd: function( gameObject, game ) {
@@ -274,10 +276,21 @@ glider.MailGoal = aqua.type(aqua.Component,
           aqua.sound.play( 'score' );
         }
 
-        this.score += 1;
+        this.score += 1 * this.multiplier;
         $('#score').text( 'SCORE: ' + this.score.toString() );
+
+        this.multiplier++;
+        $('#multiplier').text('MULTIPLIER: ' + this.multiplier);
+        this.multiplierTimer = 5;
       }
       collision.solve = true;
+    },
+    fixedUpdate: function() {
+      this.multiplierTimer -= aqua.game.world.fixedDelta;
+      if ( this.multiplierTimer < 0 && this.multiplier !== 1 ) {
+        this.multiplier = 1;
+        $('#multiplier').text('MULTIPLIER: ' + this.multiplier);
+      }
     }
   });
 

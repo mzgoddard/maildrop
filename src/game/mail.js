@@ -150,6 +150,14 @@ var MailManager = aqua.type(aqua.Component,
         if( this.mailpackets.length ) {
           this.fireTimeout = 1;
           console.log('fire', this.mailpackets.length);
+          var gliderVelocity =
+                [ this.glider.vx,
+                  this.glider.vy,
+                  0 ],
+              gliderVector =
+                [ Math.cos( this.glider.angle ),
+                  Math.sin( this.glider.angle ),
+                  0 ];
           this.mailpackets.pop().launch(
             vec3.add(
               this.glider.particle.position,
@@ -158,9 +166,15 @@ var MailManager = aqua.type(aqua.Component,
                 0],
               [ 0, 0, 0 ]
             ),
-            [ Math.cos( this.glider.angle ) * ( 200 ),
-              Math.sin( this.glider.angle ) * ( 200 ),
-              0]
+            vec3.add(
+              [ Math.cos( this.glider.angle ) * ( 500 ),
+                Math.sin( this.glider.angle ) * ( 500 ),
+                0],
+              vec3.scale(
+                gliderVector,
+                vec3.dot( gliderVelocity, gliderVector ) /
+                  vec3.dot( gliderVector, gliderVector ) )
+            )
           );
         }
         // console.log( this.mailpackets.length );

@@ -194,8 +194,6 @@ function(){
         floatView[20] = x + cos4 * l;
         floatView[21] = y + sin4 * l;
 
-        console.log(floatView, w, h);
-
         // floatView[]
 
         gl.bindBuffer(gl.ARRAY_BUFFER, buffer);
@@ -212,7 +210,8 @@ function(){
       },
       destroyCache: function(cache) {
         if ( cache.buffer ) {
-          this.gl.deleteBuffer( cache );
+          this.gl.deleteBuffer( cache.buffer );
+          delete cache.buffer;
         }
       }
     }

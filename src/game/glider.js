@@ -203,6 +203,8 @@ var GliderMove = aqua.type(aqua.Component,
       this.ay += ny;
 
       this.timeToLastCollision = 0;
+
+      this.call('onGliderCollision', this, otherParticle, collision);
     },
     destruct: function() {
       this.gameObject.game.destroy(this.gameObject);
@@ -874,6 +876,10 @@ glider.makeGlider = function(gameObject) {
   }));
   gameObject.add(GliderMove.create());
   gameObject.add(GliderRender.create());
+
+  if (glider.MailManager) {
+    gameObject.add(glider.MailManager.create());
+  }
 
   return gameObject;
 };

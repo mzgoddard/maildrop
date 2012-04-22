@@ -76,6 +76,7 @@ aqua.game.world.gravityPosition = planet.position;
 planet.isStatic = true;
 planet.isPlanet = true;
 aqua.game.world.addParticle(planet);
+aqua.game.world.planet = planet;
 
 var planetRenderer = aqua.GameObject.create();
 planetRenderer.add(glider.ParticleRenderer.create(planet));
@@ -134,7 +135,7 @@ aqua.game.world.add( glider.Jet.create(
 
 for ( var i = 0; i < 20; i++ ) {
 var mail = aqua.GameObject.create();
-mail.add( glider.Mail.create([Math.random()*1500, Math.random()*1500, 0]));
+mail.add( glider.Mail.create([Math.random()*1500, Math.random()*1500, 0],[0,10,0]));
 mail.add( glider.MailRender.create());
 aqua.game.add(mail);
 }

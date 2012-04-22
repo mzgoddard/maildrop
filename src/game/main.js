@@ -133,7 +133,8 @@ for ( var idx = 0; idx < 500; idx++ )
       1));
 
 // var jet = aqua.GameObject.create();
-aqua.game.world.add( glider.Jet.create(
+var jet, jets = [];
+aqua.game.world.add( jet = glider.Jet.create(
   [
     planet.position[0] + Math.cos(Math.PI/6) * planet.radius * 2,
     planet.position[1] + Math.sin(Math.PI/6) * planet.radius * 2,
@@ -143,7 +144,8 @@ aqua.game.world.add( glider.Jet.create(
     Math.sin(Math.PI/6) * 6000,
     0
   ] ) );
-aqua.game.world.add( glider.Jet.create(
+jets.push( jet );
+aqua.game.world.add( jet = glider.Jet.create(
   [
     planet.position[0] + Math.cos(Math.PI/6*5) * planet.radius * 2,
     planet.position[1] + Math.sin(Math.PI/6*5) * planet.radius * 2,
@@ -153,7 +155,8 @@ aqua.game.world.add( glider.Jet.create(
     Math.sin(Math.PI/6*5) * 6000,
     0
   ] ) );
-aqua.game.world.add( glider.Jet.create(
+jets.push( jet );
+aqua.game.world.add( jet = glider.Jet.create(
   [
     planet.position[0] + Math.cos(Math.PI/6*9) * planet.radius * 2,
     planet.position[1] + Math.sin(Math.PI/6*9) * planet.radius * 2,
@@ -163,7 +166,7 @@ aqua.game.world.add( glider.Jet.create(
     Math.sin(Math.PI/6*9) * 6000,
     0
   ] ) );
-
+jets.push( jet );
 // for ( var i = 0; i < 20; i++ ) {
 // var mail = aqua.GameObject.create();
 // mail.add( glider.Mail.create([Math.random()*1500, Math.random()*1500, 0],[0,10,0]));
@@ -175,6 +178,7 @@ var mail = aqua.GameObject.create();
 mail.add( glider.WaveManager.create({
   planet: planet,
   player: aqua.game.player,
+  jets: jets,
   waveOptions: {
     count: 20
     // render: {

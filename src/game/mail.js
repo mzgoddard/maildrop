@@ -398,7 +398,7 @@ glider.WaveManager = aqua.type(aqua.Component, {
   init: function( options ) {
     this.waveCount = 0;
     this.wave = null;
-    this.jets = [];
+    this.jets = options.jets || [];
     this.player = options.player;
     this.planet = options.planet;
 
@@ -424,6 +424,21 @@ glider.WaveManager = aqua.type(aqua.Component, {
     this.wave = null;
 
     this.waveOptions.count *= 1.1;
+
+    var numJets = this.jets.length;
+    this.jets.forEach( function( jet, i ) {
+      var angle =
+        Math.random() * Math.PI -
+        Math.PI * 2 / numJets / 2 +
+        Math.PI * 2 / 12 * ( 1 + i * 4 );
+
+      jet.force = [
+        Math.cos( angle ) * 6000,
+        Math.sin( angle ) * 6000,
+        0
+      ];
+      console.log( arguments, i, angle, jet.force );
+    });
 
     setTimeout( this.startWave.bind( this ), 5000 );
   }

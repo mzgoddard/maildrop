@@ -1,8 +1,12 @@
 (function() {
   var PlanetRenderer = aqua.type( aqua.Renderer,
   {
-    init: function(particle) {
-      this.particle = particle;
+    init: function(options) {
+      this.particle = options.particle;
+      this.color = options.color || 'FFFFFFFF';
+      if ( typeof this.color == 'string' ) {
+        this.color = aqua.color( this.color );
+      }
     },
     onadd: function(gameObject) {
       this.world = gameObject;
@@ -28,7 +32,7 @@
         return;
       }
 
-      var precision = 32;
+      var precision = 12;
 
       if (!this.buffer) {
         this.buffer = gl.createBuffer();
@@ -55,7 +59,10 @@
           particleArray,
           x, y, r,
           lx, ly, d,
-          red,green,blue,alpha;
+          red = this.color[ 0 ],
+          green = this.color[ 1 ],
+          blue = this.color[ 2 ],
+          alpha = this.color[ 3 ];
 
       if (!shader.matrixLocation) {
         shader.matrixLocation = gl.getUniformLocation(shader.program, 'modelview_projection');
@@ -70,17 +77,17 @@
       p = this.particle;
       floatView[ 0 ] = p.position[ 0 ];
       floatView[ 1 ] = p.position[ 1 ];
-      byteView[ 12 ] = 255;
-      byteView[ 13 ] = 255;
-      byteView[ 14 ] = 255;
-      byteView[ 15 ] = 255;
+      byteView[ 12 ] = red;
+      byteView[ 13 ] = green;
+      byteView[ 14 ] = blue;
+      byteView[ 15 ] = alpha;
       for ( var i = 0; i < precision + 1; i++ ) {
         floatView[ ( i + 1 ) * 4 ] = p.position[ 0 ] + Math.cos( Math.PI * i / precision * 2 ) * p.radius;
         floatView[ ( i + 1 ) * 4 + 1 ] = p.position[ 1 ] + Math.sin( Math.PI * i / precision * 2 ) * p.radius;
-        byteView[ ( i + 1 ) * 16 + 12 ] = 255;
-        byteView[ ( i + 1 ) * 16 + 13 ] = 255;
-        byteView[ ( i + 1 ) * 16 + 14 ] = 255;
-        byteView[ ( i + 1 ) * 16 + 15 ] = 255;
+        byteView[ ( i + 1 ) * 16 + 12 ] = red;
+        byteView[ ( i + 1 ) * 16 + 13 ] = green;
+        byteView[ ( i + 1 ) * 16 + 14 ] = blue;
+        byteView[ ( i + 1 ) * 16 + 15 ] = alpha;
       }
 
       // gl.enable(gl.BLEND);

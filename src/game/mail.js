@@ -9,6 +9,8 @@ var Mail = aqua.type(aqua.Component,
     this.inWorld = false;
   },
   ongameadd: function(gameobject, game) {
+    this.gameObject = gameobject;
+
     this.particle = aqua.Particle.create(this.position, 10, 100);
     this.particle.mail = this;
     this.particle.ignoreGravity = true;
@@ -46,9 +48,9 @@ var Mail = aqua.type(aqua.Component,
           aqua.game.world.fixedDelta,
           [ 0, 0, 0 ] ),
         [ 0, 0, 0 ] );
-      console.log.apply( console, this.particle.position )
-      console.log.apply( console, this.particle.lastPosition );
-      console.log( this.particle.position, this.particle.lastPosition );
+      // console.log.apply( console, this.particle.position )
+      // console.log.apply( console, this.particle.lastPosition );
+      // console.log( this.particle.position, this.particle.lastPosition );
       aqua.game.world.addParticle(this.particle);
       this.inWorld = true;
     }
@@ -57,8 +59,15 @@ var Mail = aqua.type(aqua.Component,
 
 var MailRenderer = aqua.type(aqua.Renderer,
 {
-  init: function() {
+  init: function( options ) {
     this.cache = {};
+    this.color = [ 255, 90, 48, 255 ];
+    if ( options ) {
+      this.color = options.color || this.color;
+      if ( typeof this.color == 'string' ) {
+        this.color = aqua.color( this.color );
+      }
+    }
   },
   onadd: function(gameobject) {
     this.move = gameobject.get(Mail);
@@ -74,11 +83,13 @@ var MailRenderer = aqua.type(aqua.Renderer,
   },
   draw: function(graphics, gl) {
     // console.log('draw');
+    // return;
     if ( this.move.inWorld )
     graphics.drawSquare({
       center: this.move.particle.position,
       size: [ 18, 10 ],
       angle: this.move.angle,
+      color: this.color,
       cache: this.cache
     });
   }
@@ -149,7 +160,7 @@ var MailManager = aqua.type(aqua.Component,
         // $('#debug').text('insight');
         if( this.mailpackets.length ) {
           this.fireTimeout = 1;
-          console.log('fire', this.mailpackets.length);
+          // console.log('fire', this.mailpackets.length);
           var gliderVelocity =
                 [ this.glider.vx,
                   this.glider.vy,
@@ -182,6 +193,35 @@ var MailManager = aqua.type(aqua.Component,
     }
   }
 });
+
+glider.MailGoal = aqua.type(aqua.Component,
+  {
+    init: function( particle ) {
+      this.particle = particle;
+      this.particle.on('collision', this.oncollision.bind(this));
+
+      this.score = 0;
+      console.log('init');
+    },
+    ongameadd: function( gameObject, game ) {
+      this.gameObject = gameObject;
+      game.world.addParticle( this.particle );
+      console.log('ongameadd');
+    },
+    ongamedestroy: function( gameOjbect, game ) {
+      game.world.removeParticle( this.particle );
+    },
+    oncollision: function( otherParticle, collision ) {
+      if ( otherParticle.mail && otherParticle.mail.inWorld ) {
+        console.log('mail!');
+        otherParticle.mail.pickup();
+        aqua.game.destroy( otherParticle.mail.gameObject );
+        this.score += 1;
+        $('#score').text( 'SCORE: ' + this.score.toString() );
+      }
+      collision.solve = true;
+    }
+  });
 
 glider.Mail = Mail;
 glider.MailRender = MailRenderer;

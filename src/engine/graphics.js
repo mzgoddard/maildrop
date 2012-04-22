@@ -32,7 +32,8 @@ function(){
         
         function initTestLoop() {
           this.gl = this.canvas.getContext('experimental-webgl', {
-            antialias: true
+            // antialias: true
+            antialias: false
           });
           if (!this.gl) {
             setTimeout(initTestLoop.bind(this), 0);
@@ -143,6 +144,7 @@ function(){
             y = options.center[ 1 ],
             w = options.size[ 0 ] / 2,
             h = options.size[ 1 ] / 2,
+            color = options.color || [ 255, 90, 48, 255 ],
             // w2 = options.size[ 0 ] / 2,
             // h2 = options.size[ 1 ] / 2,
             l = Math.mag(w, h),
@@ -200,7 +202,7 @@ function(){
         gl.bufferData(gl.ARRAY_BUFFER, floatView, gl.DYNAMIC_DRAW);
       
         gl.uniformMatrix4fv(shader.matrixLocation, false, this.projection);
-        gl.uniform4f(shader.colorLocation, 255 / 255, 90 / 255, 48 / 255, 255 / 255);
+        gl.uniform4f(shader.colorLocation, color[ 0 ] / 255, color[ 1 ] / 255, color[ 2 ] / 255, color[ 3 ] / 255);
         gl.uniform1i(shader.texture0Location, 0);
       
         gl.vertexAttribPointer(shader.positionLocation, 2, gl.FLOAT, false, 4 * 4, 0);
@@ -236,6 +238,15 @@ function(){
     aqua.graphics.push(graphics);
     
     return graphics;
+  };
+  aqua.color = function( hex ) {
+    return [
+      hex.substring( 0, 2 ),
+      hex.substring( 2, 4 ),
+      hex.substring( 4, 6 ),
+      hex.substring( 6, 8 ) ].map( function( v ) {
+        return parseInt( v, 16 );
+      } );
   };
   aqua.Renderer = Renderer;
 

@@ -106,7 +106,7 @@ var GliderMove = aqua.type(aqua.Component,
       this.ax = 0;
       this.ay = 0;
 
-      this.angle = 0;
+      this.angle = -Math.PI / 2;
 
       this.radius = 25;
 
@@ -283,8 +283,8 @@ var GliderMove = aqua.type(aqua.Component,
 
       if ( ( this.timeToLastCollision += delta ) > 1 ) {
         $('#booster').text('BOOSTERS: ON');
-        this.ax += Math.cos(this.angle) * 100;
-        this.ay += Math.sin(this.angle) * 100;
+        this.ax += Math.cos(this.angle) * 10;
+        this.ay += Math.sin(this.angle) * 10;
       } else {
         $('#booster').text('BOOSTERS: OFF');
       }
@@ -794,6 +794,15 @@ var GliderScore = aqua.type(aqua.Component,
 
 var GliderRender = aqua.type(aqua.Component,
   {
+    init: function(options) {
+      this.color = [ 255, 90, 48, 255 ];
+      if ( options ) {
+        this.color = options.color || this.color;
+      }
+      if ( typeof this.color == 'string' ) {
+        this.color = aqua.color( this.color );
+      }
+    },
     onadd: function(gameObject) {
       this.move = gameObject.get(GliderMove);
     },
@@ -861,7 +870,7 @@ var GliderRender = aqua.type(aqua.Component,
       gl.bufferData(gl.ARRAY_BUFFER, floatView, gl.DYNAMIC_DRAW);
       
       gl.uniformMatrix4fv(shader.matrixLocation, false, graphics.projection);
-      gl.uniform4f(shader.colorLocation, 255 / 255, 90 / 255, 48 / 255, 255 / 255 * ( this.move.crashTimer >= 0 ? ( this.move.maxCrashTimer - this.move.crashTimer ) / this.move.maxCrashTimer : 1 ));
+      gl.uniform4f(shader.colorLocation, this.color[ 0 ] / 255, this.color[ 1 ] / 255, this.color[ 2 ] / 255, this.color[ 3 ] / 255 * ( this.move.crashTimer >= 0 ? ( this.move.maxCrashTimer - this.move.crashTimer ) / this.move.maxCrashTimer : 1 ));
       gl.uniform1i(shader.texture0Location, 0);
       
       gl.vertexAttribPointer(shader.positionLocation, 2, gl.FLOAT, false, 4 * 4, 0);
@@ -888,7 +897,9 @@ glider.makeGlider = function(gameObject) {
     32: 'up' // space
   }));
   gameObject.add(GliderMove.create());
-  gameObject.add(GliderRender.create());
+  gameObject.add(GliderRender.create({
+    color: aqua.colors.ship
+  }));
 
   if (glider.MailManager) {
     gameObject.add(glider.MailManager.create());

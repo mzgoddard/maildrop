@@ -52,6 +52,14 @@ aqua.game.task(
   aqua.game.graphics.draw.bind(aqua.game.graphics),
   aqua.Game.Priorities.RENDER);
 
+aqua.colors = {
+  bg: '5D7370FF',
+  particle: 'FFF5BCFF',
+  planet: 'FFF5BCFF',
+  ship: '895F53FF',
+  mail: [ 255, 90, 48, 255 ]
+};
+
 aqua.game.timing = {
   delta: 0,
   last: Date.now()
@@ -66,7 +74,9 @@ aqua.game.world = aqua.World.create(aqua.Box.create(1500, 1500, 0, 0));
 
 aqua.game.add(aqua.game.world);
 // aqua.game.world.add(aqua.World.PaperRenderer.create());
-aqua.game.world.add(aqua.World.Renderer.create());
+aqua.game.world.add(aqua.World.Renderer.create({
+  color: aqua.colors.particle
+}));
 
 var planet = aqua.Particle.create([
   aqua.game.world.box.width / 2,
@@ -74,12 +84,17 @@ var planet = aqua.Particle.create([
   0 ], 50, 1);
 aqua.game.world.gravityPosition = planet.position;
 planet.isStatic = true;
+planet.isTrigger = true;
 planet.isPlanet = true;
 aqua.game.world.addParticle(planet);
 aqua.game.world.planet = planet;
 
 var planetRenderer = aqua.GameObject.create();
-planetRenderer.add(glider.ParticleRenderer.create(planet));
+planetRenderer.add(glider.ParticleRenderer.create({
+  particle: planet,
+  color: aqua.colors.planet
+}));
+planetRenderer.add(glider.MailGoal.create(planet));
 aqua.game.add(planetRenderer);
 
 // aqua.game.player = btb.makeShip();
@@ -140,9 +155,14 @@ mail.add( glider.MailRender.create());
 aqua.game.add(mail);
 }
 
+var clearColor = aqua.color( aqua.colors.bg );
 aqua.game.graphics.addDrawCall(aqua.PriorityItem.create(function(graphics, gl) {
   // graphics setup (once)
-  gl.clearColor(0, 22 / 255, 55 / 255, 255 / 255);
+  gl.clearColor(
+    clearColor[ 0 ] / 255,
+    clearColor[ 1 ] / 255,
+    clearColor[ 2 ] / 255,
+    clearColor[ 3 ] / 255 );
   graphics.useShader('basic');
   gl.enable(gl.BLEND);
   gl.blendFunc(gl.SRC_ALPHA, gl.DST_ALPHA);

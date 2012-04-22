@@ -166,11 +166,13 @@ var Particle = aqua.type(aqua.Emitter,
       var solve = true;
       if (a.isTrigger) {
         a.call('collision', b, c);
-        solve = false;
+        solve = collision.solve || false;
+        delete collision.solve;
       }
       if (b.isTrigger) {
         b.call('collision', a, c);
-        solve = false;
+        solve = collision.solve || false;
+        delete collision.solve;
       }
       if (solve) {
         a.lastPosition[0] = a.lx = a.position[0] + avx;
@@ -548,6 +550,12 @@ var World = aqua.type(aqua.GameObject,
 
 var WorldRenderer = aqua.type(aqua.Renderer,
   {
+    init: function(options) {
+      this.color = options.color || [ 218, 43, 58, 255 ];
+      if ( typeof this.color == 'string' ) {
+        this.color = aqua.color( this.color );
+      }
+    },
     onadd: function(gameObject) {
       this.world = gameObject;
     },
@@ -590,7 +598,11 @@ var WorldRenderer = aqua.type(aqua.Renderer,
           particleArray,
           x, y, r,
           lx, ly, d,
-          red,green,blue,alpha;
+          red,green,blue,alpha,
+          redClamp = this.color[ 0 ],
+          greenClamp = this.color[ 1 ],
+          blueClamp = this.color[ 2 ],
+          alphaClamp = this.color[ 3 ];
 
       if (!shader.matrixLocation) {
         shader.matrixLocation = gl.getUniformLocation(shader.program, 'modelview_projection');
@@ -627,10 +639,10 @@ var WorldRenderer = aqua.type(aqua.Renderer,
           x = p.x; y = p.y; lx = p.lx; ly = p.ly;
           d = Math.mag(x-lx,y-ly) * 2 / 15;
 
-          red = Math.clamp(d * 255, 0, 218);
-          green = Math.clamp(d * 255, 0, 43);
-          blue = Math.clamp(d * 255, 0, 58);
-          alpha = Math.clamp(d * 255, 0, 255);
+          red = Math.clamp(d * 255, 0, redClamp);
+          green = Math.clamp(d * 255, 0, greenClamp);
+          blue = Math.clamp(d * 255, 0, blueClamp);
+          alpha = Math.clamp(d * 255, 0, alphaClamp);
         }else {
           red = green = blue = alpha = 0;
         }

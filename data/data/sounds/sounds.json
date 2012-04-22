@@ -1,0 +1,14 @@
+{
+  "pickup": {
+    "path": "sounds/pickup2.wav"
+  },
+  "launch": {
+    "path": "sounds/launch.wav"
+  },
+  "score": {
+    "path": "sounds/score.wav"
+  },
+  "death": {
+    "path": "sounds/death.wav"
+  }
+}

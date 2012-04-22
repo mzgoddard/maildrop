@@ -102,7 +102,7 @@ var MailManager = aqua.type(aqua.Component,
     this.fireTimeout = 0;
 
     this.bestChain = parseInt( localStorage.bestChain || 0, 10 );
-    $('#best-chain').text('BEST CHAIN: ' + this.bestChain);
+    $('#best-chain').text( this.bestChain);
   },
   onadd: function(gameobject) {
     this.glider = gameobject.get(glider.GliderMove);
@@ -119,10 +119,10 @@ var MailManager = aqua.type(aqua.Component,
       otherParticle.mail.pickup();
       otherParticle.mail.call('destroyCache');
 
-      $('#chain').text('CHAIN: ' + this.mailpackets.length);
+      $('#chain').text( this.mailpackets.length);
       if ( this.mailpackets.length > this.bestChain ) {
         this.bestChain = this.mailpackets.length;
-        $('#best-chain').text('BEST CHAIN: ' + this.bestChain);
+        $('#best-chain').text( this.bestChain);
         localStorage.bestChain = this.bestChain.toString();
       }
     }
@@ -144,7 +144,7 @@ var MailManager = aqua.type(aqua.Component,
       );
     }
 
-    $('#chain').text('CHAIN: ' + this.mailpackets.length);
+    $('#chain').text( this.mailpackets.length);
   },
   fixedUpdate: function() {
     // 
@@ -227,7 +227,7 @@ var MailManager = aqua.type(aqua.Component,
           );
         }
         // console.log( this.mailpackets.length );
-        $('#chain').text('CHAIN: ' + this.mailpackets.length);
+        $('#chain').text( this.mailpackets.length);
       }
     }
 
@@ -268,7 +268,7 @@ glider.MailGoal = aqua.type(aqua.Component,
       this.score = 0;
       this.multiplier = 1;
       this.bestMultiplier = parseInt( localStorage.bestMultiplier || 1, 10 );
-      $('#best-multiplier').text('BEST MULTIPLIER: ' + this.bestMultiplier);
+      $('#best-multiplier').text(this.bestMultiplier + 'x' );
 
       this.multiplierTimer = 0;
       console.log('init');
@@ -293,17 +293,17 @@ glider.MailGoal = aqua.type(aqua.Component,
         }
 
         this.score += 1 * this.multiplier;
-        $('#score').text( 'SCORE: ' + this.score.toString() );
+        $('#score').text( this.score.toString() );
 
         this.multiplier++;
-        $('#multiplier').text('MULTIPLIER: ' + this.multiplier);
+        $('#multiplier').text( this.multiplier + 'x' );
         this.multiplierTimer = 5;
 
         if ( this.multiplier > this.bestMultiplier ) {
           this.bestMultiplier = this.multiplier;
           localStorage.bestMultiplier = this.bestMultiplier.toString();
 
-          $('#best-multiplier').text('BEST MULTIPLIER: ' + this.bestMultiplier);
+          $('#best-multiplier').text( this.bestMultiplier + 'x' );
         }
       }
       collision.solve = true;
@@ -312,7 +312,7 @@ glider.MailGoal = aqua.type(aqua.Component,
       this.multiplierTimer -= aqua.game.world.fixedDelta;
       if ( this.multiplierTimer < 0 && this.multiplier !== 1 ) {
         this.multiplier = 1;
-        $('#multiplier').text('MULTIPLIER: ' + this.multiplier);
+        $('#multiplier').text( this.multiplier + 'x' );
       }
     }
   });
@@ -417,7 +417,7 @@ glider.WaveManager = aqua.type(aqua.Component, {
     this.wave.on( 'complete', this.endWave.bind( this ) );
 
     this.waveCount ++;
-    $('#wave').text('WAVE: ' + this.waveCount);
+    $('#wave').text( this.waveCount);
   },
   endWave: function() {
     aqua.game.destroy( this.wave.gameObject );

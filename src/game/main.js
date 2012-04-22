@@ -204,7 +204,7 @@ aqua.game.graphics.addDrawCall(aqua.PriorityItem.create(function(graphics, gl) {
 
   graphics.canvas.width = width;
   graphics.canvas.height = height;
-  
+
   gl.viewport(0, 0, width, height);
 
   var displayWidth = aqua.game.world.box.width * ( width / height );
@@ -222,6 +222,14 @@ aqua.game.graphics.addDrawCall(aqua.PriorityItem.create(function(graphics, gl) {
   gl.clear(gl.COLOR_BUFFER_BIT);
   graphics.useShader('basic');
 }, -1000));
+
+window.onresize = function() {
+  $('#hud').css('left', window.innerWidth / 2 - $('#hud').width() / 2);
+  $('#hud2')
+    .css('top', $('#title').height() - $('#wave-label').height())
+    .css('left', window.innerWidth / 2 - $('#hud').width() / 2 + $('#hud').width() + 10);
+};
+window.onresize();
 
 function loop() {
   aqua.requestAnimFrame.call(null, loop);

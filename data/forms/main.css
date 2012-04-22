@@ -136,3 +136,19 @@ canvas {
   top: 0;
   color: white;
 }
+
+#score, #multiplier, #chain {
+  float: right;
+  display: inline;
+}
+
+#best-multiplier, #best-chain, #wave {
+  display: inline;
+}
+
+#hud2 {
+  position: absolute;
+  left: 150px;
+  top: 0px;
+  color: white;
+}

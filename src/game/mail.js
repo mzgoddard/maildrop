@@ -100,6 +100,9 @@ var MailManager = aqua.type(aqua.Component,
   init: function() {
     this.mailpackets = [];
     this.fireTimeout = 0;
+
+    this.bestChain = parseInt( localStorage.bestChain || 0, 10 );
+    $('#best-chain').text('BEST CHAIN: ' + this.bestChain);
   },
   onadd: function(gameobject) {
     this.glider = gameobject.get(glider.GliderMove);
@@ -115,6 +118,13 @@ var MailManager = aqua.type(aqua.Component,
       this.mailpackets.push( otherParticle.mail );
       otherParticle.mail.pickup();
       otherParticle.mail.call('destroyCache');
+
+      $('#chain').text('CHAIN: ' + this.mailpackets.length);
+      if ( this.mailpackets.length > this.bestChain ) {
+        this.bestChain = this.mailpackets.length;
+        $('#best-chain').text('BEST CHAIN: ' + this.bestChain);
+        localStorage.bestChain = this.bestChain.toString();
+      }
     }
   },
   onGliderDeath: function() {
@@ -133,6 +143,8 @@ var MailManager = aqua.type(aqua.Component,
         ]
       );
     }
+
+    $('#chain').text('CHAIN: ' + this.mailpackets.length);
   },
   fixedUpdate: function() {
     // 
@@ -215,6 +227,7 @@ var MailManager = aqua.type(aqua.Component,
           );
         }
         // console.log( this.mailpackets.length );
+        $('#chain').text('CHAIN: ' + this.mailpackets.length);
       }
     }
 
@@ -254,6 +267,9 @@ glider.MailGoal = aqua.type(aqua.Component,
 
       this.score = 0;
       this.multiplier = 1;
+      this.bestMultiplier = parseInt( localStorage.bestMultiplier || 1, 10 );
+      $('#best-multiplier').text('BEST MULTIPLIER: ' + this.bestMultiplier);
+
       this.multiplierTimer = 0;
       console.log('init');
     },
@@ -282,6 +298,13 @@ glider.MailGoal = aqua.type(aqua.Component,
         this.multiplier++;
         $('#multiplier').text('MULTIPLIER: ' + this.multiplier);
         this.multiplierTimer = 5;
+
+        if ( this.multiplier > this.bestMultiplier ) {
+          this.bestMultiplier = this.multiplier;
+          localStorage.bestMultiplier = this.bestMultiplier.toString();
+
+          $('#best-multiplier').text('BEST MULTIPLIER: ' + this.bestMultiplier);
+        }
       }
       collision.solve = true;
     },

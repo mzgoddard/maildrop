@@ -84,7 +84,7 @@ var MailRenderer = aqua.type(aqua.Renderer,
   draw: function(graphics, gl) {
     // console.log('draw');
     // return;
-    if ( this.move.inWorld )
+    // if ( this.move.inWorld )
     graphics.drawSquare({
       center: this.move.particle.position,
       size: [ 18, 10 ],
@@ -105,6 +105,7 @@ var MailManager = aqua.type(aqua.Component,
     this.glider = gameobject.get(glider.GliderMove);
     // this.input = gameobject.get(glider.GliderInput);
     this.glider.on('onGliderCollision', this.onGliderCollision.bind(this));
+    this.glider.on('death', this.onGliderDeath.bind(this));
   },
   onGliderCollision: function(glider, otherParticle, collision) {
     if ( otherParticle.mail && otherParticle.mail.inWorld ) {
@@ -114,6 +115,23 @@ var MailManager = aqua.type(aqua.Component,
       this.mailpackets.push( otherParticle.mail );
       otherParticle.mail.pickup();
       otherParticle.mail.call('destroyCache');
+    }
+  },
+  onGliderDeath: function() {
+    while ( this.mailpackets.length ) {
+      var packet = this.mailpackets.pop();
+      packet.launch(
+        [
+          packet.x,
+          packet.y,
+          0
+        ],
+        [
+          Math.random() * 30 - 15,
+          Math.random() * 30 - 15,
+          0
+        ]
+      );
     }
   },
   fixedUpdate: function() {
@@ -197,6 +215,32 @@ var MailManager = aqua.type(aqua.Component,
           );
         }
         // console.log( this.mailpackets.length );
+      }
+    }
+
+    // form held mail into a line
+    var lastLinkX = this.glider.particle.position[ 0 ] - Math.cos( this.glider.angle ) * this.glider.radius,
+        lastLinkY = this.glider.particle.position[ 1 ] - Math.sin( this.glider.angle ) * this.glider.radius,
+        packet,
+        angleToLink,
+        distanceToLink;
+    for ( var i = 0; i < this.mailpackets.length; i++ ) {
+      packet = this.mailpackets[ i ];
+
+      distanceToLink = Math.mag(
+        lastLinkX - packet.particle.position[ 0 ],
+        lastLinkY - packet.particle.position[ 1 ]
+      );
+      if ( distanceToLink > packet.particle.radius * 2 ) {
+        angleToLink = Math.atan2(
+          lastLinkY - packet.particle.position[ 1 ],
+          lastLinkX - packet.particle.position[ 0 ]
+        );
+
+        distanceToLink -= packet.particle.radius * 2;
+        lastLinkX = packet.x = packet.particle.position[ 0 ] += Math.cos( angleToLink ) * distanceToLink;
+        lastLinkY = packet.y = packet.particle.position[ 1 ] += Math.sin( angleToLink ) * distanceToLink;
+        packet.angle = angleToLink;
       }
     }
   }

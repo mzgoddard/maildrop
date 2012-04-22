@@ -162,6 +162,8 @@ var GliderMove = aqua.type(aqua.Component,
           aqua.sound.play( 'death' );
         }
 
+        this.call( 'death' );
+
         aqua.game.task(function() {
           self.particle.mass = 1e3;
           self.particle.friction = 1;

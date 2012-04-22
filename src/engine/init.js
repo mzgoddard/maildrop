@@ -9,7 +9,8 @@
         return when.all([
         load.script('engine/object.js'),
         load.script('engine/graphics.js'),
-        load.script('engine/physics.js')
+        load.script('engine/physics.js'),
+        load.script('engine/sound.js')
         ]);
       }
 //       function() {

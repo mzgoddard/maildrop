@@ -34,6 +34,22 @@ var $ = window.$,
 aqua.game = aqua.Game.create();
 aqua.game.tallyStuff = {};
 
+aqua.sound = aqua.SoundContext.create();
+load.json( 'sounds/sounds.json' ).then( function( sounds ) {
+  sounds = JSON.parse( sounds );
+  for ( var key in sounds ) {
+    console.log( key, sounds[ key ].path );
+    aqua.sound.load( {
+      name: key,
+      path: sounds[ key ].path
+    }).then( function() {
+      console.log(arguments);
+    }, function() {
+      console.log('error', arguments);
+    });
+  }
+});
+
 // paper.setup($('canvas')[0]);
 // paper.view.viewSize.width=800;
 // paper.view.viewSize.height=600;

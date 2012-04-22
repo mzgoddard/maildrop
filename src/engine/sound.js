@@ -9,20 +9,22 @@ var document = window.document,
 var SoundContext = aqua.type(aqua.type.Base,
   {
     init: function() {
+      this.promises = {};
+
       if (window.webkitAudioContext) {
         this.context = new window.webkitAudioContext();
-        
-        var clipsDefer = when.defer();
-        
-        when.chain(when.all([
-          when(load.data('music/happy.ogg'), this._loadClip.bind(this, 'happy')),
-          when(load.data('music/zone.ogg'), this._loadClip.bind(this, 'zone')),
-          when(load.data('music/approach_danger.ogg'), this._loadClip.bind(this, 'approach')),
-          when(load.data('music/danger.ogg'), this._loadClip.bind(this, 'danger'))
-        ]), clipsDefer);
-        
-        clipsDefer.then(this._playAll.bind(this));
-        
+
+        // var clipsDefer = when.defer();
+        // 
+        // when.chain(when.all([
+        //   when(load.data('music/happy.ogg'), this._loadClip.bind(this, 'happy')),
+        //   when(load.data('music/zone.ogg'), this._loadClip.bind(this, 'zone')),
+        //   when(load.data('music/approach_danger.ogg'), this._loadClip.bind(this, 'approach')),
+        //   when(load.data('music/danger.ogg'), this._loadClip.bind(this, 'danger'))
+        // ]), clipsDefer);
+        // 
+        // clipsDefer.then(this._playAll.bind(this));
+
         this.nodes = {
           main: this.context.createGainNode()
         };
@@ -58,14 +60,47 @@ var SoundContext = aqua.type(aqua.type.Base,
         }
       }
     },
+    load: function( options ) {
+      if ( this.promises[ options.name ] ) {
+        return this.promises[ options.name ];
+      }
+
+      var promise = when.defer(),
+          dataPromise = load.data( options.path ),
+          self = this;
+
+      dataPromise.then( function( data ) {
+          try {
+            self._loadClip( options.name, data );
+            promise.resolve( options.name );
+          } catch( e ) {
+            promise.reject( e );
+          }
+        },
+        promise.reject.bind(promise),
+        promise.progress.bind(promise)
+      );
+
+      this.promises[ options.name ] = promise;
+
+      return promise;
+    },
     _loadClip: function(name, clip) {
       var node = this.nodes[name] = {
-        source: this.context.createBufferSource(),
         buffer: this.context.createBuffer(clip, false)
       };
-      
-      node.source.connect(this.nodes.main);
-      node.source.buffer = node.buffer;
+
+      // node.source.connect(this.nodes.main);
+      // node.source.buffer = node.buffer;
+    },
+    play: function( name ) {
+      if ( this.nodes[ name ] ) {
+        console.log( 'play', name );
+        var source = this.context.createBufferSource();
+        source.buffer = this.nodes[ name ].buffer;
+        source.connect( this.nodes.main );
+        source.noteOn( 0 );
+      }
     },
     _playAll: function() {
       this.nodes.happy.source.noteOn(0);

@@ -108,6 +108,9 @@ var MailManager = aqua.type(aqua.Component,
   },
   onGliderCollision: function(glider, otherParticle, collision) {
     if ( otherParticle.mail && otherParticle.mail.inWorld ) {
+      if ( aqua.sound ) {
+        aqua.sound.play( 'pickup' );
+      }
       this.mailpackets.push( otherParticle.mail );
       otherParticle.mail.pickup();
       otherParticle.mail.call('destroyCache');
@@ -161,6 +164,11 @@ var MailManager = aqua.type(aqua.Component,
         if( this.mailpackets.length ) {
           this.fireTimeout = 1;
           // console.log('fire', this.mailpackets.length);
+
+          if ( aqua.sound ) {
+            aqua.sound.play( 'launch' );
+          }
+
           var gliderVelocity =
                 [ this.glider.vx,
                   this.glider.vy,
@@ -216,6 +224,11 @@ glider.MailGoal = aqua.type(aqua.Component,
         console.log('mail!');
         otherParticle.mail.pickup();
         aqua.game.destroy( otherParticle.mail.gameObject );
+
+        if ( aqua.sound ) {
+          aqua.sound.play( 'score' );
+        }
+
         this.score += 1;
         $('#score').text( 'SCORE: ' + this.score.toString() );
       }

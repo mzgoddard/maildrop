@@ -10,5 +10,14 @@
   },
   "death": {
     "path": "sounds/death.wav"
+  },
+  "spawn": {
+    "path": "sounds/spawn.wav"
+  },
+  "waveend": {
+    "path": "sounds/waveend.wav"
+  },
+  "wavestart": {
+    "path": "sounds/wavestart.wav"
   }
 }

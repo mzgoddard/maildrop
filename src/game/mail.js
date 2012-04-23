@@ -423,6 +423,10 @@ glider.WaveManager = aqua.type(aqua.Component, {
 
     this.waveCount ++;
     $('#wave').text( this.waveCount);
+
+    if ( aqua.sound ) {
+      aqua.sound.play( 'wavestart' );
+    }
   },
   endWave: function() {
     aqua.game.destroy( this.wave.gameObject );
@@ -442,8 +446,11 @@ glider.WaveManager = aqua.type(aqua.Component, {
         Math.sin( angle ) * 6000,
         0
       ];
-      console.log( arguments, i, angle, jet.force );
     });
+
+    if ( aqua.sound ) {
+      aqua.sound.play( 'waveend' );
+    }
 
     setTimeout( this.startWave.bind( this ), 5000 );
   }

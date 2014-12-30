@@ -15,31 +15,31 @@
     }
   ],
   "files": {
-    "dist/glider": {
+    "dist/maildrop": {
       "src": [
         "src/load.js",
         "src/compiled.js",
         "src/engine/base.js",
         "src/engine/math.js",
         "src/engine/object.js",
-        "src/engine/paper_graphics.js",
+        "src/engine/graphics.js",
         "src/engine/physics.js",
         "src/engine/init.js",
+        "src/engine/sound.js",
         "src/game/main.js",
-        "src/game/common.js",
-        "src/game/bullet.js",
-        "src/game/enemy.js",
-        "src/game/level.js",
-        "src/game/ship.js"
+        "src/game/jet.js",
+        "src/game/mail.js",
+        "src/game/glider.js",
+        "src/game/planet.js"
       ],
       "prehint": false,
       "posthint": false,
       "debug": true,
 
       "meta": {
-        "label": "glider",
+        "label": "maildrop",
         "author": "Michael \"Z\" Goddard",
-        "version": "0.0.0",
+        "version": "0.2.0",
         "homeurl": "",
         "license": [],
         "copyright": ""

@@ -44,8 +44,8 @@ load.json( 'sounds/sounds.json' ).then( function( sounds ) {
       path: sounds[ key ].path
     }).then( function() {
       console.log(arguments);
-    }, function() {
-      console.log('error', arguments);
+    }, function(e) {
+      console.error(e.stack || e);
     });
   }
 });

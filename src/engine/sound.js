@@ -27,7 +27,7 @@ var SoundContext = aqua.type(aqua.type.Base,
         // clipsDefer.then(this._playAll.bind(this));
 
         this.nodes = {
-          main: this.context.createGainNode()
+          main: this.context.createGain()
         };
         
         this.nodes.main.connect(this.context.destination);
@@ -87,20 +87,24 @@ var SoundContext = aqua.type(aqua.type.Base,
       return promise;
     },
     _loadClip: function(name, clip) {
-      var node = this.nodes[name] = {
-        buffer: this.context.createBuffer(clip, false)
-      };
+      var defer = when.defer();
+      this.context.decodeAudioData(clip, function(buffer) {
+        var node = this.nodes[name] = {
+          buffer: buffer
+        };
+        defer.resolve();
+      }.bind(this), defer.reject);
+      return defer.promise;
 
       // node.source.connect(this.nodes.main);
       // node.source.buffer = node.buffer;
     },
     play: function( name ) {
       if ( this.nodes[ name ] ) {
-        console.log( 'play', name );
         var source = this.context.createBufferSource();
         source.buffer = this.nodes[ name ].buffer;
         source.connect( this.nodes.main );
-        source.noteOn( 0 );
+        source.start();
       }
     },
     _playAll: function() {

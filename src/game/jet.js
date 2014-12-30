@@ -21,6 +21,7 @@ var Jet = aqua.type(aqua.Component,
       // this.x = this.world.box.left + this.world.box.width / 4 * 3;
     },
     oncollision: function(p, collision) {
+      if (p.mail) return;
       p.acceleration[0] += this.force[0];
       p.acceleration[1] += this.force[1];
     },
